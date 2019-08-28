@@ -1,41 +1,108 @@
 package com.example.applicationingsw;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SignupActivity extends AppCompatActivity {
+public class SignupActivity extends Activity {
     private static final String TAG = "SignupActivity";
 
-    EditText _nameText;
-    EditText _emailText;
-    EditText _passwordText;
-    Button _signupButton;
-    TextView _loginLink;
+    EditText nameText;
+    EditText emailText;
+    EditText passwordText;
+    Button signupButton;
+    Spinner genderSpinner;
+    TextView loginLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-        _emailText = findViewById(R.id.input_email);
-        _passwordText = findViewById(R.id.input_password);
-        _nameText = findViewById(R.id.input_name);
-        _signupButton = findViewById(R.id.btn_signup);
-        _loginLink = findViewById(R.id.link_login);
-        _signupButton.setOnClickListener(new View.OnClickListener() {
+        emailText = findViewById(R.id.input_email);
+        passwordText = findViewById(R.id.input_password);
+        nameText = findViewById(R.id.input_name);
+        signupButton = findViewById(R.id.btn_signup);
+        loginLink = findViewById(R.id.link_login);
+        genderSpinner = findViewById(R.id.input_gender);
+        final String[] genders = getResources().getStringArray(R.array.gender_array);
+        // Initializing an ArrayAdapter
+        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                this,android.R.layout.simple_spinner_dropdown_item,genders){
+            @Override
+            public boolean isEnabled(int position){
+                if(position == 0)
+                {
+                    // Disable the first item from Spinner
+                    // First item will be use for hint
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            @Override
+            public View getDropDownView(int position, View convertView,
+                                        ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView tv = (TextView) view;
+                if(position == 0){
+                    // Set the hint text color gray
+                    tv.setTextColor(Color.GRAY);
+
+                }
+                else {
+                    tv.setTextColor(Color.WHITE);
+                }
+                return view;
+            }
+        };
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        genderSpinner.setAdapter(spinnerArrayAdapter);
+        genderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedItemText = (String) parent.getItemAtPosition(position);
+                // If user change the default selection
+                // First item is disable and it is used for hint
+                if(position > 0){
+                    // Notify the selected item text
+                    Toast.makeText
+                            (getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
+                            .show();
+                }
+                TextView tv = (TextView) view;
+                if(position == 0){
+                    // Set the hint text color gray
+                    tv.setTextColor(Color.LTGRAY);
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                genderSpinner.setSelection(0);
+            }
+        });
+        signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 signup();
             }
         });
 
-        _loginLink.setOnClickListener(new View.OnClickListener() {
+        loginLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Finish the registration screen and return to the Login activity
@@ -52,7 +119,7 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        _signupButton.setEnabled(false);
+        signupButton.setEnabled(false);
 
         final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this,
                 R.style.AppTheme_Dark_Dialog);
@@ -60,9 +127,9 @@ public class SignupActivity extends AppCompatActivity {
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
-        String name = _nameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String name = nameText.getText().toString();
+        String email = emailText.getText().toString();
+        String password = passwordText.getText().toString();
 
         // TODO: Implement your own signup logic here.
 
@@ -80,7 +147,7 @@ public class SignupActivity extends AppCompatActivity {
 
 
     public void onSignupSuccess() {
-        _signupButton.setEnabled(true);
+        signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
         finish();
     }
@@ -88,35 +155,35 @@ public class SignupActivity extends AppCompatActivity {
     public void onSignupFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
 
-        _signupButton.setEnabled(true);
+        signupButton.setEnabled(true);
     }
 
     public boolean validate() {
         boolean valid = true;
 
-        String name = _nameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String name = nameText.getText().toString();
+        String email = emailText.getText().toString();
+        String password = passwordText.getText().toString();
 
         if (name.isEmpty() || name.length() < 3) {
-            _nameText.setError("at least 3 characters");
+            nameText.setError("at least 3 characters");
             valid = false;
         } else {
-            _nameText.setError(null);
+            nameText.setError(null);
         }
 
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailText.setError("enter a valid email address");
+            emailText.setError("enter a valid email address");
             valid = false;
         } else {
-            _emailText.setError(null);
+            emailText.setError(null);
         }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
+            passwordText.setError("between 4 and 10 alphanumeric characters");
             valid = false;
         } else {
-            _passwordText.setError(null);
+            passwordText.setError(null);
         }
 
         return valid;

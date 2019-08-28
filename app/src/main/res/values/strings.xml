@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">ApplicationIngSW</string>
+    <string-array name="gender_array">
+        <item>Gender</item>
+        <item>Male</item>
+        <item>Female</item>
+        <item>Rather not say</item>
+        <item>A gender not listed here</item>
+    </string-array>
 </resources>
