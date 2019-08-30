@@ -15,15 +15,27 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
+import com.amazonaws.regions.Regions;
+
 public class SignupActivity extends Activity {
     private static final String TAG = "SignupActivity";
 
-    EditText nameText;
-    EditText emailText;
-    EditText passwordText;
-    Button signupButton;
-    Spinner genderSpinner;
-    TextView loginLink;
+    private EditText nameText;
+    private EditText emailText;
+    private EditText passwordText;
+    private EditText surnameText;
+    private EditText cityText;
+    private EditText addressText;
+    private Button signupButton;
+    private Spinner genderSpinner;
+    private TextView loginLink;
+    //Istanza di un user pool cognito
+    private CognitoUserPool userPool ;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,6 +47,10 @@ public class SignupActivity extends Activity {
         signupButton = findViewById(R.id.btn_signup);
         loginLink = findViewById(R.id.link_login);
         genderSpinner = findViewById(R.id.input_gender);
+        surnameText = findViewById(R.id.input_surname);
+        cityText = findViewById(R.id.input_city);
+        addressText = findViewById(R.id.input_address);
+        userPool = new CognitoUserPool(getApplicationContext(), "eu-west-1_KQhWEFGrY", "3kjf4fl4bmn540hfg7v105mvmb", null, Regions.EU_WEST_1);
         final String[] genders = getResources().getStringArray(R.array.gender_array);
         // Initializing an ArrayAdapter
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
@@ -130,8 +146,14 @@ public class SignupActivity extends Activity {
         String name = nameText.getText().toString();
         String email = emailText.getText().toString();
         String password = passwordText.getText().toString();
-
-        // TODO: Implement your own signup logic here.
+        String surname = surnameText.getText().toString();
+        String city = cityText.getText().toString();
+        String address = addressText.getText().toString();
+        String gender = "";
+        if ( !genderSpinner.getSelectedItem().toString().equals("Gender")){
+            gender = genderSpinner.getSelectedItem().toString();
+        }
+        signUpWithCognito(name,email,password,surname,city,address,gender);
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
@@ -143,6 +165,43 @@ public class SignupActivity extends Activity {
                         progressDialog.dismiss();
                     }
                 }, 3000);
+    }
+
+    public void signUpWithCognito(String name,String email,String password,String surname,String city,String address,String gender){
+        // Create a CognitoUserAttributes object and add user attributes
+        CognitoUserAttributes userAttributes = new CognitoUserAttributes();
+// Add the user attributes. Attributes are added as key-value pairs
+        userAttributes.addAttribute("name", name);
+        userAttributes.addAttribute("email", email);
+        userAttributes.addAttribute("family_name", surname);
+        userAttributes.addAttribute("locale", city);
+        userAttributes.addAttribute("address", address);
+        userAttributes.addAttribute("gender", gender);
+        SignUpHandler signupCallback = new SignUpHandler() {
+            @Override
+            public void onSuccess(CognitoUser cognitoUser, boolean userConfirmed, CognitoUserCodeDeliveryDetails cognitoUserCodeDeliveryDetails) {
+                // Sign-up was successful
+
+                // Check if this user (cognitoUser) needs to be confirmed
+                if(!userConfirmed) {
+                    // TODO: This user must be confirmed and a confirmation code was sent to the user,cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent, Get the confirmation code from user
+                    // This user must be confirmed and a confirmation code was sent to the user
+                    // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
+                    // Get the confirmation code from user
+                    Log.i(TAG, cognitoUserCodeDeliveryDetails.getDeliveryMedium() + " poi " + cognitoUserCodeDeliveryDetails.getAttributeName() + " poi "+ cognitoUserCodeDeliveryDetails.getDestination());
+                }
+                else {
+                    // The user has already been confirmed
+                }
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                // Sign-up failed, check exception for the cause
+                Log.i(TAG, exception.getLocalizedMessage());
+            }
+        };
+        userPool.signUpInBackground(email,password, userAttributes, null,signupCallback);
     }
 
 
@@ -164,6 +223,10 @@ public class SignupActivity extends Activity {
         String name = nameText.getText().toString();
         String email = emailText.getText().toString();
         String password = passwordText.getText().toString();
+        String surname = surnameText.getText().toString();
+        String city = cityText.getText().toString();
+        String address = addressText.getText().toString();
+        String gender = genderSpinner.getSelectedItem().toString();;
 
         if (name.isEmpty() || name.length() < 3) {
             nameText.setError("at least 3 characters");
@@ -184,6 +247,31 @@ public class SignupActivity extends Activity {
             valid = false;
         } else {
             passwordText.setError(null);
+        }
+        if (surname.isEmpty() || surname.length() < 2 || surname.length() > 50) {
+            surnameText.setError("between 2 and 50 alphanumeric characters");
+            valid = false;
+        } else {
+            surnameText.setError(null);
+        }
+        if (city.isEmpty() || city.length() < 2 || city.length() > 50) {
+            cityText.setError("between 2 and 50 alphanumeric characters");
+            valid = false;
+        } else {
+            cityText.setError(null);
+        }
+        if (address.isEmpty() || address.length() < 2 || address.length() > 70) {
+            addressText.setError("between 2 and 70 alphanumeric characters");
+            valid = false;
+        } else {
+            addressText.setError(null);
+        }
+        if ( gender.equals("Gender")){
+            ((TextView)genderSpinner.getSelectedView()).setError("Select a gender");
+            valid = false;
+        }
+        else{
+            ((TextView)genderSpinner.getSelectedView()).setError(null);
         }
 
         return valid;

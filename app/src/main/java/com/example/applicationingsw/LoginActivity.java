@@ -11,11 +11,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.regions.Regions;
+
 
 public class LoginActivity extends Activity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
-
+    //Istanza di un user pool cognito
+    CognitoUserPool userPool ;
     EditText emailText ;
     EditText passwordText ;
     Button loginButton ;
@@ -45,6 +49,8 @@ public class LoginActivity extends Activity {
                 startActivityForResult(intent, REQUEST_SIGNUP);
             }
         });
+        userPool = new CognitoUserPool(getApplicationContext(), "eu-west-1_KQhWEFGrY", "3kjf4fl4bmn540hfg7v105mvmb", null, Regions.EU_WEST_1);
+
     }
 
     public void login() {
