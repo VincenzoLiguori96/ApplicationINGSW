@@ -1,7 +1,11 @@
 package com.example.applicationingsw;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,6 +40,7 @@ public class SignupActivity extends Activity {
     private TextView loginLink;
     //Istanza di un user pool cognito
     private CognitoUserPool userPool ;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -137,15 +142,15 @@ public class SignupActivity extends Activity {
 
         signupButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this,
+        progressDialog = new ProgressDialog(SignupActivity.this,
                 R.style.AppTheme_Dark_Dialog);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
         String name = nameText.getText().toString();
-        String email = emailText.getText().toString();
-        String password = passwordText.getText().toString();
+        final String email = emailText.getText().toString();
+        final String password = passwordText.getText().toString();
         String surname = surnameText.getText().toString();
         String city = cityText.getText().toString();
         String address = addressText.getText().toString();
@@ -155,21 +160,11 @@ public class SignupActivity extends Activity {
         }
         signUpWithCognito(name,email,password,surname,city,address,gender);
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
-                        onSignupSuccess();
-                        // onSignupFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
     }
 
-    public void signUpWithCognito(String name,String email,String password,String surname,String city,String address,String gender){
+    public void signUpWithCognito(String name, final String email, final String password, String surname, String city, String address, String gender){
         // Create a CognitoUserAttributes object and add user attributes
-        CognitoUserAttributes userAttributes = new CognitoUserAttributes();
+        final CognitoUserAttributes userAttributes = new CognitoUserAttributes();
 // Add the user attributes. Attributes are added as key-value pairs
         userAttributes.addAttribute("name", name);
         userAttributes.addAttribute("email", email);
@@ -179,19 +174,28 @@ public class SignupActivity extends Activity {
         userAttributes.addAttribute("gender", gender);
         SignUpHandler signupCallback = new SignUpHandler() {
             @Override
-            public void onSuccess(CognitoUser cognitoUser, boolean userConfirmed, CognitoUserCodeDeliveryDetails cognitoUserCodeDeliveryDetails) {
+            public void onSuccess(final CognitoUser cognitoUser, boolean userConfirmed, CognitoUserCodeDeliveryDetails cognitoUserCodeDeliveryDetails) {
                 // Sign-up was successful
 
                 // Check if this user (cognitoUser) needs to be confirmed
                 if(!userConfirmed) {
                     // TODO: This user must be confirmed and a confirmation code was sent to the user,cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent, Get the confirmation code from user
-                    // This user must be confirmed and a confirmation code was sent to the user
-                    // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
-                    // Get the confirmation code from user
                     Log.i(TAG, cognitoUserCodeDeliveryDetails.getDeliveryMedium() + " poi " + cognitoUserCodeDeliveryDetails.getAttributeName() + " poi "+ cognitoUserCodeDeliveryDetails.getDestination());
+
+                    new android.os.Handler().postDelayed(
+                            new Runnable() {
+                                public void run() {
+                                    // On complete call either onSignupSuccess or onSignupFailed
+                                    // depending on success
+                                    // onSignupFailed();
+                                    progressDialog.dismiss();
+                                    onSignupSuccess(email,password);
+
+                                }
+                            }, 3000);
                 }
                 else {
-                    // The user has already been confirmed
+                    onSignupSuccess(email, password,true);
                 }
             }
 
@@ -199,22 +203,60 @@ public class SignupActivity extends Activity {
             public void onFailure(Exception exception) {
                 // Sign-up failed, check exception for the cause
                 Log.i(TAG, exception.getLocalizedMessage());
+                onSignupFailed(exception);
             }
         };
         userPool.signUpInBackground(email,password, userAttributes, null,signupCallback);
     }
 
 
-    public void onSignupSuccess() {
+    public void onSignupSuccess(String email, String password) {
         signupButton.setEnabled(true);
-        setResult(RESULT_OK, null);
-        finish();
+        Intent newUser = new Intent();
+        Bundle extras = new Bundle();
+        extras.putString("EXTRA_EMAIL",email);
+        extras.putString("EXTRA_PASSWORD",password);
+        newUser.putExtras(extras);
+        setResult(RESULT_OK,newUser);
+        showAlertDialog(SignupActivity.this, "Email sent", "We need you to confirm your email. Check your inbox and then log-in!",true);
     }
 
-    public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
+    public void onSignupSuccess(String email, String password,boolean alreadyConfirmed) {
         signupButton.setEnabled(true);
+        Intent newUser = new Intent();
+        Bundle extras = new Bundle();
+        extras.putString("EXTRA_EMAIL",email);
+        extras.putString("EXTRA_PASSWORD",password);
+        newUser.putExtras(extras);
+        setResult(RESULT_OK,newUser);
+    }
+
+    public void onSignupFailed(Exception exception) {
+        Toast.makeText(getBaseContext(), "Sign up failed", Toast.LENGTH_LONG).show();
+        showAlertDialog(SignupActivity.this, "An error occured", "Error: "+exception.getLocalizedMessage()+ " Please retry.",false);
+        signupButton.setEnabled(true);
+        progressDialog.dismiss();
+    }
+
+    public void onSignupFailed(){
+        Toast.makeText(getBaseContext(), "Sign up failed", Toast.LENGTH_LONG).show();
+        signupButton.setEnabled(true);
+    }
+
+    public void showAlertDialog(Context context, String title, String message, final boolean dismissSignUpActivity) {
+        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        if(dismissSignUpActivity){
+                            finish();
+                        }
+                    }
+                });
+        alertDialog.show();
     }
 
     public boolean validate() {
@@ -228,40 +270,40 @@ public class SignupActivity extends Activity {
         String address = addressText.getText().toString();
         String gender = genderSpinner.getSelectedItem().toString();;
 
-        if (name.isEmpty() || name.length() < 3) {
-            nameText.setError("at least 3 characters");
+        if (name.isEmpty() || name.length() < 2) {
+            nameText.setError("At least 2 characters!");
             valid = false;
         } else {
             nameText.setError(null);
         }
 
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailText.setError("enter a valid email address");
+            emailText.setError("Enter a valid email address!");
             valid = false;
         } else {
             emailText.setError(null);
         }
 
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            passwordText.setError("between 4 and 10 alphanumeric characters");
+        if (!checkPassword(password)) {
+            passwordText.setError("The password must be at least 8 characters long, and must contain at least one capital letter and one number.");
             valid = false;
         } else {
             passwordText.setError(null);
         }
         if (surname.isEmpty() || surname.length() < 2 || surname.length() > 50) {
-            surnameText.setError("between 2 and 50 alphanumeric characters");
+            surnameText.setError("The surname must be at least 2 characters long and less than 50 characters.");
             valid = false;
         } else {
             surnameText.setError(null);
         }
         if (city.isEmpty() || city.length() < 2 || city.length() > 50) {
-            cityText.setError("between 2 and 50 alphanumeric characters");
+            cityText.setError("The city must be at least 2 characters long and less than 50 characters.");
             valid = false;
         } else {
             cityText.setError(null);
         }
         if (address.isEmpty() || address.length() < 2 || address.length() > 70) {
-            addressText.setError("between 2 and 70 alphanumeric characters");
+            addressText.setError("The address must be at least 2 characters long and less than 50 characters.");
             valid = false;
         } else {
             addressText.setError(null);
@@ -275,5 +317,12 @@ public class SignupActivity extends Activity {
         }
 
         return valid;
+    }
+
+    public boolean checkPassword(String password){
+        String passwordPattern = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,})";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(passwordPattern);
+        java.util.regex.Matcher matcher = pattern.matcher(password);
+        return matcher.matches();
     }
 }

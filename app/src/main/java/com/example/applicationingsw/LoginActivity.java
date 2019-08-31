@@ -87,13 +87,14 @@ public class LoginActivity extends Activity {
 
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent dataBack) {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
-
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
-                this.finish();
+                Bundle extras = dataBack.getExtras();
+                String email_string = extras.getString("EXTRA_EMAIL");
+                String password_string = extras.getString("EXTRA_PASSWORD");
+                emailText.setText(email_string);
+                passwordText.setText(password_string);
             }
         }
     }
