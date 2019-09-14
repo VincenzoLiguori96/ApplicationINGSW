@@ -1,7 +1,10 @@
 package com.example.applicationingsw;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,7 +14,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.amazonaws.regions.Regions;
 
 
@@ -19,11 +30,13 @@ public class LoginActivity extends Activity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
     //Istanza di un user pool cognito
-    CognitoUserPool userPool ;
-    EditText emailText ;
-    EditText passwordText ;
-    Button loginButton ;
-    TextView signupLink ;
+    private CognitoUserPool userPool ;
+    private CognitoUser currentUser;
+    private EditText emailText ;
+    private EditText passwordText ;
+    private Button loginButton ;
+    private TextView signupLink ;
+    private ProgressDialog progressDialog ;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +63,6 @@ public class LoginActivity extends Activity {
             }
         });
         userPool = new CognitoUserPool(getApplicationContext(), "eu-west-1_KQhWEFGrY", "3kjf4fl4bmn540hfg7v105mvmb", null, Regions.EU_WEST_1);
-
     }
 
     public void login() {
@@ -62,27 +74,16 @@ public class LoginActivity extends Activity {
         }
 
         loginButton.setEnabled(false);
-
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
+        progressDialog = new ProgressDialog(LoginActivity.this,
                 R.style.AppTheme_Dark_Dialog);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
-
         String email = emailText.getText().toString();
         String password = passwordText.getText().toString();
 
-        // TODO: Implement your own authentication logic here.
+        loginWithCognito(email,password);
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
     }
 
 
@@ -97,6 +98,62 @@ public class LoginActivity extends Activity {
                 passwordText.setText(password_string);
             }
         }
+    }
+
+    public void loginWithCognito(String email, final String password){
+        // Callback handler for the sign-in process
+        currentUser = userPool.getUser(email);
+        CognitoUser saved = userPool.getCurrentUser();
+        Log.i(TAG, "Utente attuale:" + currentUser.getUserId());
+        Log.i(TAG, "Saved:" + saved.getUserId());
+        AuthenticationHandler authenticationHandler = new AuthenticationHandler() {
+
+
+            @Override
+            public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {
+                Log.i(TAG,"Utente connesso");
+                progressDialog.dismiss();
+                showAlertDialog(LoginActivity.this,"Ok login effettuato", userSession.getUsername() + userSession.getAccessToken());
+
+            }
+
+            @Override
+            public void getAuthenticationDetails(AuthenticationContinuation authenticationContinuation, String userId) {
+                // The API needs user sign-in credentials to continue
+                Log.i(TAG, "Utente con cui mi sono autenticato attuale:" + userId);
+                AuthenticationDetails authenticationDetails = new AuthenticationDetails(userId, password, null);
+
+                // Pass the user sign-in credentials to the continuation
+                authenticationContinuation.setAuthenticationDetails(authenticationDetails);
+
+                // Allow the sign-in to continue
+                authenticationContinuation.continueTask();
+            }
+
+            @Override
+            public void getMFACode(MultiFactorAuthenticationContinuation multiFactorAuthenticationContinuation) {
+                multiFactorAuthenticationContinuation.continueTask();
+            }
+
+            @Override
+            public void authenticationChallenge(ChallengeContinuation continuation) {
+                Log.i(TAG, "Continuation da authentication challenge: "+ continuation.getChallengeName() + continuation.getParameters() + continuation);
+                continuation.continueTask();
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                // Sign-in failed, check exception for the cause
+                Log.e(TAG, "Errore al login");
+                progressDialog.dismiss();
+                showAlertDialog(LoginActivity.this, "An error occured", "Error: "+exception.getLocalizedMessage()+ " Please retry.");
+                loginButton.setEnabled(true);
+
+            }
+        };
+
+// Sign in the user
+        currentUser.getSessionInBackground(authenticationHandler);
     }
 
     @Override
@@ -129,8 +186,8 @@ public class LoginActivity extends Activity {
             emailText.setError(null);
         }
 
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            passwordText.setError("between 4 and 10 alphanumeric characters");
+        if (!checkPassword(password)) {
+            passwordText.setError("The password must be at least 8 characters long, and must contain at least one capital letter and one number.");
             valid = false;
         } else {
             passwordText.setError(null);
@@ -138,4 +195,26 @@ public class LoginActivity extends Activity {
 
         return valid;
     }
+
+    public void showAlertDialog(Context context, String title, String message) {
+        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
+    }
+
+
+    public boolean checkPassword(String password){
+        String passwordPattern = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,})";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(passwordPattern);
+        java.util.regex.Matcher matcher = pattern.matcher(password);
+        return matcher.matches();
+    }
+
 }

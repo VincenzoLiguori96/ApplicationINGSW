@@ -21,7 +21,13 @@ allprojects {
         maven { url "https://jitpack.io" }
     }
 }
+apply plugin: 'java'
+apply plugin: 'idea'
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
+

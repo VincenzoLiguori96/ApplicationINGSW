@@ -236,6 +236,7 @@ public class SignupActivity extends Activity {
         showAlertDialog(SignupActivity.this, "An error occured", "Error: "+exception.getLocalizedMessage()+ " Please retry.",false);
         signupButton.setEnabled(true);
         progressDialog.dismiss();
+        progressDialog.cancel();
     }
 
     public void onSignupFailed(){

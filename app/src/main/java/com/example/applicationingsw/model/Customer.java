@@ -1,4 +1,4 @@
-package com.example.applicationingsw.Model;
+package com.example.applicationingsw.model;
 
 public class Customer {
     private String name;
