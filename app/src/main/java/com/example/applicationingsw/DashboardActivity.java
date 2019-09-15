@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,7 +16,9 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -38,6 +41,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     private ItemsAdapter itemsAdapter;
     private ImageView menuImageView;
     private ImageView cartImageView;
+    private SwipeRefreshLayout refreshLayout;
     private DrawerLayout leftSideMenu;
     private List<Item> itemsList = new ArrayList<>();
     private SearchView searchView;
@@ -52,6 +56,17 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         leftSideMenu =findViewById( R.id.drawer_layout);
         setNavigationViewListener();
         searchView = findViewById(R.id.action_search_dashboard);
+        searchView.setBackgroundResource(R.drawable.searchview_rounded);
+
+        searchView.setSubmitButtonEnabled(false);
+        customizeSearchView();
+        refreshLayout = findViewById(R.id.dashboardRefresh);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshData();
+            }
+        });
         setSearchManager();
         menuImageView = findViewById(R.id.leftMenuImage);
         menuImageView.setOnClickListener(new View.OnClickListener() {
@@ -111,7 +126,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     private void loadItemsData() {
         //show loading in recyclerview
         itemsAdapter.showLoading();
-        parseJsonToItems();
+        getItemsFromAPI();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -121,21 +136,41 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 itemsAdapter.addItems(itemsList);
             }
         }, 3000);
+    }
+
+    private void customizeSearchView(){
+        LinearLayout linearLayoutOfSearchView = (LinearLayout)searchView.getChildAt(0);
+        // and do whatever to your button
+        final ImageView imageView = new ImageView(this);
+        final Integer imgResId = R.drawable.ic_separator;
+        final Integer[] resId = {imgResId};
+        imageView.setImageResource(imgResId);
+        final ImageView imageView2 = new ImageView(this);
+        final Integer imgResId2= R.drawable.ic_filter;
+        imageView.setImageResource(imgResId);
+        linearLayoutOfSearchView.addView(imageView);
+        linearLayoutOfSearchView.addView(imageView2);
+
 
     }
 
+    public void refreshData(){
+        itemsList.clear();
+        getItemsFromAPI();
+    }
     private void setNavigationViewListener() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.leftSideMenu);
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    public void parseJsonToItems(){
+    public void getItemsFromAPI(){
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         String apiItemEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/items";
         final JsonObjectRequest request = new JsonObjectRequest(apiItemEndpoint, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
+
                     JSONArray jsonArrayOfItems = response.getJSONArray("items");
                     for(int i = 0; i< jsonArrayOfItems.length();i++){
                         JSONObject item = jsonArrayOfItems.getJSONObject(i);
@@ -165,7 +200,9 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
+                finally {
+                    requestCompleted();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
@@ -174,6 +211,12 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             }
         });
         requestQueue.add(request);
+    }
+
+    public void requestCompleted(){
+        if(refreshLayout.isRefreshing()){
+            refreshLayout.setRefreshing(false);
+        }
     }
 
     public void openLeftMenu(){

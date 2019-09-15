@@ -68,13 +68,25 @@
                             android:src="@drawable/ic_cart" />
                     </LinearLayout>
                 </android.support.v7.widget.Toolbar>
-                <android.support.v7.widget.SearchView
-                    android:id="@+id/action_search_dashboard"
+                <android.widget.LinearLayout
+                    android:layout_height="50dp"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:icon="@drawable/ic_search"
-                    android:orderInCategory="100"
-                    android:visibility="visible"></android.support.v7.widget.SearchView>
+                    android:background="@color/design_default_color_primary_dark"
+                    android:orientation="horizontal">
+                        <android.support.v7.widget.SearchView
+                            android:id="@+id/action_search_dashboard"
+                            android:layout_width="wrap_content"
+                            android:layout_marginLeft="30dp"
+                            android:paddingLeft="-16dp"
+                            app:iconifiedByDefault="false"
+                            android:background="@color/white"
+                            android:layout_height="30dp"
+                            android:icon="@drawable/ic_search"
+                            android:orderInCategory="100"
+                            android:visibility="visible"
+                            android:layout_weight="1">
+                        </android.support.v7.widget.SearchView>
+                </android.widget.LinearLayout>
                 <include layout="@layout/dashboard_content" />
             </android.support.design.widget.AppBarLayout>
         </LinearLayout>
