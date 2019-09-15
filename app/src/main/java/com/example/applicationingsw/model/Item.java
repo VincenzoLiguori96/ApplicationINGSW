@@ -63,7 +63,7 @@ public class Item {
 
     public Item() {}
 
-    public Item(int anId, String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory) {
+    public Item(int anId, String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory,List<String>tagsList) {
         id = (anId);
         name =  (aName);
         price = aPrice + "€";
@@ -71,7 +71,7 @@ public class Item {
         description =  (aDescription);
         quantity = (aQuantity);
         url = (anUrl);
-        tags = new ArrayList<>();
+        tags = tagsList;
         category = aCategory;
     }
 
@@ -116,5 +116,10 @@ public class Item {
 
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+    @Override
+    public String toString(){
+        return "Nome: " + getName();
     }
 }

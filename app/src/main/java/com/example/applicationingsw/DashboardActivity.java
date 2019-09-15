@@ -1,5 +1,7 @@
 package com.example.applicationingsw;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -8,25 +10,38 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.applicationingsw.adapters.ItemsAdapter;
-import com.example.applicationingsw.helpers.AdaptiveScrollListener;
 import com.example.applicationingsw.helpers.Space;
 import com.example.applicationingsw.model.Item;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private ItemsAdapter productsAdapter;
+public class DashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemsAdapter.ItemsAdapterListener {
+    private ItemsAdapter itemsAdapter;
     private ImageView menuImageView;
     private ImageView cartImageView;
     private DrawerLayout leftSideMenu;
+    private List<Item> itemsList = new ArrayList<>();
+    private SearchView searchView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +51,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         setSupportActionBar(toolbar);*/
         leftSideMenu =findViewById( R.id.drawer_layout);
         setNavigationViewListener();
+        searchView = findViewById(R.id.action_search_dashboard);
+        setSearchManager();
         menuImageView = findViewById(R.id.leftMenuImage);
         menuImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,8 +72,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         //Bind RecyclerView from layout to recyclerViewProducts object
         RecyclerView recyclerViewProducts = findViewById(R.id.recyclerViewProducts);
 
-        //Create new ProductsAdapter
-        productsAdapter = new ItemsAdapter(this);
+        //Create new itemsAdapter
+        itemsAdapter = new ItemsAdapter(this,this);
         //Create new GridLayoutManager
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
                 2,//span count no of items in single row
@@ -65,19 +82,11 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         //set layout manager as gridLayoutManager
         recyclerViewProducts.setLayoutManager(gridLayoutManager);
 
-        //Crete new EndlessScrollListener fo endless recyclerview loading
-        AdaptiveScrollListener endlessScrollListener = new AdaptiveScrollListener(gridLayoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                if (!productsAdapter.loading)
-                    feedData();
-            }
-        };
         //to give loading item full single row
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                switch (productsAdapter.getItemViewType(position)) {
+                switch (itemsAdapter.getItemViewType(position)) {
                     case ItemsAdapter.PRODUCT_ITEM:
                         return 1;
                     case ItemsAdapter.LOADING_ITEM:
@@ -87,40 +96,31 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 }
             }
         });
+        loadItemsData();
         //add on on Scroll listener
-        recyclerViewProducts.addOnScrollListener(endlessScrollListener);
         //add space between cards
         recyclerViewProducts.addItemDecoration(new Space(2, 20, true, 0));
         //Finally set the adapter
-        recyclerViewProducts.setAdapter(productsAdapter);
-        //load first page of recyclerview
-        endlessScrollListener.onLoadMore(0, 0);
+        recyclerViewProducts.setAdapter(itemsAdapter);
+
     }
 
     //Load Data from your server here
     // loading data from server will make it very large
     // that's why i created data locally
-    private void feedData() {
+    private void loadItemsData() {
         //show loading in recyclerview
-        productsAdapter.showLoading();
-        final List<Item> products = new ArrayList<>();
-        int[] imageUrls = {R.drawable.img1, R.drawable.img2, R.drawable.img3, R.drawable.img4};
-        String[] ProductName = {"Kingsmon Top", "Adidas Top", "Butterfly Top", "White Top"};
-        Float[] ProductPrice = {Float.valueOf(594), Float.valueOf(5000), Float.valueOf(20), Float.valueOf(1999)};
-        boolean[] isNew = {true, false, false, true};
-        for (int i = 0; i < imageUrls.length; i++) {
-            Item product = new Item(1, ProductName[i],"Nessuno", ProductPrice[i].floatValue(), "Articolo",3,"",null);
-            products.add(product);
-        }
+        itemsAdapter.showLoading();
+        parseJsonToItems();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 //hide loading
-                productsAdapter.hideLoading();
+                itemsAdapter.hideLoading();
                 //add products to recyclerview
-                productsAdapter.addItems(products);
+                itemsAdapter.addItems(itemsList);
             }
-        }, 2000);
+        }, 3000);
 
     }
 
@@ -129,7 +129,52 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         navigationView.setNavigationItemSelectedListener(this);
     }
 
+    public void parseJsonToItems(){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        String apiItemEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/items";
+        final JsonObjectRequest request = new JsonObjectRequest(apiItemEndpoint, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray jsonArrayOfItems = response.getJSONArray("items");
+                    for(int i = 0; i< jsonArrayOfItems.length();i++){
+                        JSONObject item = jsonArrayOfItems.getJSONObject(i);
+                        int id = item.getInt("id");
+                        String name = item.getString("name");
+                        String manufacturer = item.getString("manufacturer");
+                        float price = new Float(item.getDouble("price"));
+                        String description = item.getString("description");
+                        String imageUrl = item.getString("url");
+                        String category = item.getString("category");
+                        Integer quantity = item.getInt("quantity");
+                        ArrayList<String> tags = new ArrayList<String>();
+                        JSONArray jsonArray = item.getJSONArray("tags");
+                        if (jsonArray != null) {
+                            int len = jsonArray.length();
+                            for (int j=0;j<len;j++){
+                                tags.add(jsonArray.getString(j));
+                            }
+                        }
+                        Item currentItem = new Item(id,name,manufacturer,price,description,quantity,imageUrl,category,tags);
+                        currentItem.setNew(true);
+                        itemsList.add(currentItem);
+                        for (Item it : itemsList){
+                            Log.e("ITEM", it.toString());
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        requestQueue.add(request);
+    }
 
     public void openLeftMenu(){
         leftSideMenu.openDrawer(Gravity.START);
@@ -156,5 +201,38 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
         }
         return false;
+    }
+
+    @Override
+    public void onItemSelected(Item item) {
+        //TODO vai alla schermata dettaglio
+        Toast.makeText(getApplicationContext(), "Selected: " + item.getName() + ", " + item.getCategory(), Toast.LENGTH_LONG).show();
+    }
+    
+    public void setSearchManager(){
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        searchView.setQueryHint("Search an item...");
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.e("ERRORE", "QUERY: " + query);
+                // filter recycler view when query submitted
+                itemsAdapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+                itemsAdapter.getFilter().filter(query);
+                return false;
+            }
+        });
     }
 }

@@ -5,27 +5,35 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-import com.example.applicationingsw.model.Item;
+
 import com.example.applicationingsw.R;
+import com.example.applicationingsw.model.Item;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemsAdapter extends RecyclerView.Adapter {
+public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
     List<Item> mItems;
+    List<Item> filteredItems;
     Context mContext;
     public static final int LOADING_ITEM = 0;
     public static final int PRODUCT_ITEM = 1;
     int LoadingItemPos;
     public boolean loading = false;
+    private ItemsAdapterListener listener;
 
-    public ItemsAdapter(Context mContext) {
+
+    public ItemsAdapter(Context mContext,ItemsAdapterListener listener) {
         mItems = new ArrayList<>();
+        filteredItems = mItems;
         this.mContext = mContext;
+        this.listener = listener;
+
     }
 
     //method to add Items as soon as they fetched 
@@ -61,16 +69,16 @@ public class ItemsAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         //get current Item
-        final Item currentItem = mItems.get(position);
+        final Item currentItem = filteredItems.get(position);
         if (holder instanceof ItemHolder) {
             ItemHolder ItemHolder = (ItemHolder) holder;
             //bind Items information with view
             //TODO: Fetch dell'immagine
             //Picasso.with(mContext).load(currentItem.getImageResourceId()).into(ItemHolder.imageViewItemThumb);
             //TODO: Sostituisci con il fetch
-            Picasso.with(mContext).load(R.drawable.img1).into(ItemHolder.imageViewItemThumb);
+            Picasso.with(mContext).load(currentItem.getUrl()).into(ItemHolder.imageViewItemThumb);
             ItemHolder.textViewItemName.setText(currentItem.getName());
             ItemHolder.textViewItemPrice.setText(currentItem.getPrice());
             if (currentItem.isNew())
@@ -81,17 +89,63 @@ public class ItemsAdapter extends RecyclerView.Adapter {
             ItemHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // user selected Item now you can show details of that Item 
-                    Toast.makeText(mContext, "Selected " + currentItem.getName(), Toast.LENGTH_SHORT).show();
+                    // send selected contact in callback
+                    listener.onItemSelected(filteredItems.get(position));
                 }
             });
         }
 
     }
 
+    public interface ItemsAdapterListener {
+        void onItemSelected(Item item);
+    }
+
     @Override
     public int getItemCount() {
-        return mItems.size();
+        return filteredItems.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    filteredItems = mItems;
+                } else {
+                    List<Item> filteredList = new ArrayList<>();
+                    for (Item item : mItems) {
+
+                        if (item.getName().toLowerCase().contains(charString.toLowerCase())) {
+                            filteredList.add(item);
+                        }
+                        else{
+                            List<String> tagsOfItem = item.getTags();
+                            for(String tag : tagsOfItem){
+                                if(tag.toLowerCase().contains(charString.toLowerCase())){
+                                    filteredList.add(item);
+                                }
+                            }
+                        }
+                    }
+
+                    filteredItems = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredItems;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                filteredItems = (ArrayList<Item>) filterResults.values;
+                // refresh the list with filtered data
+                notifyDataSetChanged();
+            }
+        };
     }
 
     //Holds view of Item with information
@@ -135,4 +189,7 @@ public class ItemsAdapter extends RecyclerView.Adapter {
             loading = false;
         }
     }
+
+
+
 }

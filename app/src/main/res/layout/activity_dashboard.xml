@@ -68,6 +68,13 @@
                             android:src="@drawable/ic_cart" />
                     </LinearLayout>
                 </android.support.v7.widget.Toolbar>
+                <android.support.v7.widget.SearchView
+                    android:id="@+id/action_search_dashboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:icon="@drawable/ic_search"
+                    android:orderInCategory="100"
+                    android:visibility="visible"></android.support.v7.widget.SearchView>
                 <include layout="@layout/dashboard_content" />
             </android.support.design.widget.AppBarLayout>
         </LinearLayout>

@@ -113,8 +113,9 @@ public class LoginActivity extends Activity {
             public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {
                 Log.i(TAG,"Utente connesso");
                 progressDialog.dismiss();
-                showAlertDialog(LoginActivity.this,"Ok login effettuato", userSession.getUsername() + userSession.getAccessToken());
-
+                Intent myIntent = new Intent(LoginActivity.this, DashboardActivity.class);
+                LoginActivity.this.startActivity(myIntent);
+                LoginActivity.this.finish();
             }
 
             @Override
