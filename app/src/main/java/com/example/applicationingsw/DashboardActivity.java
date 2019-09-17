@@ -143,6 +143,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             @Override
             public void run() {
                 //hide loading
+                //TODO migliora
                 itemsAdapter.hideLoading();
                 //add products to recyclerview
                 itemsAdapter.addItems(itemsList);

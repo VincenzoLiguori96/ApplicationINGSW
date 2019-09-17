@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/rect_rounded_pink"
+    android:background="@color/design_default_color_primary_dark"
     android:theme="@style/Theme.AppCompat"
     tools:context=".ApplyFilterActivity">
     <LinearLayout
@@ -23,7 +24,6 @@
                 android:id="@+id/popup_exit"
                 android:gravity="center_vertical"
                 android:src="@drawable/ic_cancel" />
-
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -45,94 +45,131 @@
                 android:paddingRight="25dp"
                 android:text="Done" />
         </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:textSize="26dp"
-            android:layout_gravity="left"
-            android:textColor="@color/white"
-            android:textStyle="italic"
-            android:gravity="right|center_horizontal"
-            android:paddingBottom="15dp"
-            android:paddingLeft="18dp"
-            android:text="Price range" />
-
-        <com.jaygoo.widget.RangeSeekBar
-            android:id="@+id/priceRange"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:rsb_gravity="center"
-            app:rsb_mode="range"
-            android:layout_marginLeft="18dp"
-            android:layout_marginRight="18dp"
-            app:rsb_max="999.99"
-            app:rsb_min="0"
-            app:rsb_progress_color="@color/white"
-            app:rsb_tick_mark_mode="number"
-            app:rsb_indicator_show_mode="alwaysShow"
-            app:rsb_indicator_text_size="22dp"
-            app:rsb_indicator_background_color="@color/light_pink"
-            app:rsb_tick_mark_gravity="right"
-            app:rsb_tick_mark_number="1000"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:textSize="26dp"
-            android:layout_gravity="left"
-            android:textColor="@color/white"
-            android:textStyle="italic"
-            android:gravity="right|center_horizontal"
-            android:paddingBottom="15dp"
-            android:paddingLeft="18dp"
-            android:text="Manufacturer" />
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="80dp">
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/manufacturerTextInput"
+            android:layout_height="match_parent"
+            >
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:layout_marginLeft="18dp"
-                android:layout_marginRight="18dp"
-                android:hint="Search by manufacturer"
-                android:textSize="26dp" />
-        </android.support.design.widget.TextInputLayout>
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:textSize="18dp"
+                    android:layout_gravity="left"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:gravity="right|center_horizontal"
+                    android:paddingBottom="15dp"
+                    android:paddingLeft="18dp"
+                    android:text="Price range" />
+                <com.jaygoo.widget.RangeSeekBar
+                    android:id="@+id/priceRange"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:rsb_gravity="center"
+                    app:rsb_mode="range"
+                    android:layout_marginLeft="18dp"
+                    android:layout_marginRight="18dp"
+                    app:rsb_max="999.99"
+                    app:rsb_min="0"
+                    app:rsb_progress_color="@color/white"
+                    app:rsb_tick_mark_mode="number"
+                    app:rsb_indicator_show_mode="alwaysShow"
+                    app:rsb_indicator_text_size="18dp"
+                    app:rsb_indicator_background_color="@color/design_default_color_primary_dark"
+                    app:rsb_tick_mark_gravity="right"
+                    app:rsb_tick_mark_number="1000"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:textSize="18dp"
+                    android:layout_gravity="left"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:gravity="right|center_horizontal"
+                    android:paddingBottom="15dp"
+                    android:paddingLeft="18dp"
+                    android:text="Manufacturer" />
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp">
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/manufacturerTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginLeft="18dp"
+                        android:layout_marginRight="18dp"
+                        android:hint="Search by manufacturer"
+                        android:textSize="15dp" />
+                </android.support.design.widget.TextInputLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:gravity="right|center_horizontal"
-            android:paddingLeft="18dp"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:text="Keywords"
-            android:textColor="@color/white"
-            android:textSize="26dp"
-            android:textStyle="italic" />
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="80dp">
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/insertKeywordTextInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:layout_marginLeft="18dp"
-                android:layout_marginRight="18dp"
-                android:hint="Insert a keyword"
-                android:textSize="26dp" />
-        </android.support.design.widget.TextInputLayout>
+                <TextView
+                    android:id="@+id/categoryTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:gravity="right|center_horizontal"
+                    android:paddingLeft="18dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:text="Category"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="italic" />
 
+                <Spinner
+                    android:id="@+id/spinnerCategories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:spinnerMode="dropdown"
+                    android:popupBackground="@color/design_default_color_primary_dark"
+                    android:layout_below="@id/categoryTextView"
+                    android:layout_marginLeft="18dp"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:gravity="right|center_horizontal"
+                    android:paddingLeft="18dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
+                    android:text="Keywords"
+                    android:textColor="@color/white"
+                    android:textSize="18dp"
+                    android:textStyle="italic" />
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp">
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/insertKeywordTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_marginLeft="18dp"
+                        android:layout_marginRight="18dp"
+                        android:hint="Insert a keyword"
+                        android:textSize="15dp" />
+                </android.support.design.widget.TextInputLayout>
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    >
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:id="@+id/tagsContainer"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginLeft="18dp"
+                        android:layout_marginBottom="18dp"
+                        android:layout_marginRight="18dp">
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
-
-
-
-
-
-
 </android.support.v7.widget.LinearLayoutCompat>
