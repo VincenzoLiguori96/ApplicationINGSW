@@ -2,6 +2,7 @@ package com.example.applicationingsw;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -16,9 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -29,6 +28,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.applicationingsw.adapters.ItemsAdapter;
 import com.example.applicationingsw.helpers.Space;
 import com.example.applicationingsw.model.Item;
+import com.jaygoo.widget.RangeSeekBar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,10 +41,12 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     private ItemsAdapter itemsAdapter;
     private ImageView menuImageView;
     private ImageView cartImageView;
+    private ImageView filteredSearchImageView;
     private SwipeRefreshLayout refreshLayout;
     private DrawerLayout leftSideMenu;
     private List<Item> itemsList = new ArrayList<>();
     private SearchView searchView;
+    private RecyclerView recyclerViewProducts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +56,18 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);*/
         leftSideMenu =findViewById( R.id.drawer_layout);
+        filteredSearchImageView = findViewById(R.id.filteredSearch);
+        filteredSearchImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openApplyFilterView();
+            }
+        });
         setNavigationViewListener();
         searchView = findViewById(R.id.action_search_dashboard);
-        searchView.setBackgroundResource(R.drawable.searchview_rounded);
-
+        searchView.setBackgroundResource(R.drawable.rect_rounded_white);
+        filteredSearchImageView = findViewById(R.id.filteredSearch);
         searchView.setSubmitButtonEnabled(false);
-        customizeSearchView();
         refreshLayout = findViewById(R.id.dashboardRefresh);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -85,7 +93,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         });
 
         //Bind RecyclerView from layout to recyclerViewProducts object
-        RecyclerView recyclerViewProducts = findViewById(R.id.recyclerViewProducts);
+        recyclerViewProducts = findViewById(R.id.recyclerViewProducts);
 
         //Create new itemsAdapter
         itemsAdapter = new ItemsAdapter(this,this);
@@ -120,6 +128,10 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     }
 
+    private void openApplyFilterView(){
+        Intent myIntent = new Intent(DashboardActivity.this, ApplyFilterActivity.class);
+        startActivity(myIntent);
+    }
     //Load Data from your server here
     // loading data from server will make it very large
     // that's why i created data locally
@@ -138,25 +150,12 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         }, 3000);
     }
 
-    private void customizeSearchView(){
-        LinearLayout linearLayoutOfSearchView = (LinearLayout)searchView.getChildAt(0);
-        // and do whatever to your button
-        final ImageView imageView = new ImageView(this);
-        final Integer imgResId = R.drawable.ic_separator;
-        final Integer[] resId = {imgResId};
-        imageView.setImageResource(imgResId);
-        final ImageView imageView2 = new ImageView(this);
-        final Integer imgResId2= R.drawable.ic_filter;
-        imageView.setImageResource(imgResId);
-        linearLayoutOfSearchView.addView(imageView);
-        linearLayoutOfSearchView.addView(imageView2);
-
-
-    }
 
     public void refreshData(){
         itemsList.clear();
         getItemsFromAPI();
+        itemsAdapter.addItems(itemsList);
+        itemsAdapter.notifyDataSetChanged();
     }
     private void setNavigationViewListener() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.leftSideMenu);
@@ -170,7 +169,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             @Override
             public void onResponse(JSONObject response) {
                 try {
-
                     JSONArray jsonArrayOfItems = response.getJSONArray("items");
                     for(int i = 0; i< jsonArrayOfItems.length();i++){
                         JSONObject item = jsonArrayOfItems.getJSONObject(i);
