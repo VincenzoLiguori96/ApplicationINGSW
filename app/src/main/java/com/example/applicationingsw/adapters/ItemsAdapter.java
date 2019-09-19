@@ -86,7 +86,7 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
             //bind Items information with view
             Picasso.with(mContext).load(currentItem.getUrl()).into(ItemHolder.imageViewItemThumb);
             ItemHolder.textViewItemName.setText(currentItem.getName());
-            ItemHolder.textViewItemPrice.setText(currentItem.getPrice());
+            ItemHolder.textViewItemPrice.setText(currentItem.getPriceWithConcurrency());
             if (currentItem.isNew() && !currentItem.isLoading())
                 ItemHolder.textViewNew.setVisibility(View.VISIBLE);
             else

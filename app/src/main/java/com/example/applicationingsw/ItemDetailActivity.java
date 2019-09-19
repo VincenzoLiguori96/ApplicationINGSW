@@ -70,7 +70,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         productImage = findViewById(R.id.productimage);
         Picasso.with(this).load(currentItem.getUrl()).into(productImage);
         priceTextView = findViewById(R.id.priceTextView);
-        priceTextView.setText(currentItem.getPrice());
+        priceTextView.setText(currentItem.getPriceWithConcurrency());
         nameTextView = findViewById(R.id.productName);
         nameTextView.setText(currentItem.getName());
         descriptionTextView = findViewById(R.id.productDescription);

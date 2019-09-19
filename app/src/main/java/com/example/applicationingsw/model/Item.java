@@ -1,8 +1,11 @@
 package com.example.applicationingsw.model;
 
 
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.example.applicationingsw.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +69,8 @@ public class Item implements Parcelable {
     public String getManufacturer() {
         return manufacturer;
     }
-    public String getPrice() { return price;   }
+    public String getPriceWithConcurrency() { return price;   }
+    public float getPriceWithoutConcurrency(){return Float.valueOf(price.replaceAll(Resources.getSystem().getString(R.string.concurrency),""));}
     public String getDescription() {
         return description;
     }
@@ -81,7 +85,7 @@ public class Item implements Parcelable {
     }
     public void setName(String name) { this.name = (name); }
     public void setManufacturer(String manufacturer) {  this.manufacturer = (manufacturer); }
-    public void setPrice(float price) {    this.price = price + "€"; }
+    public void setPrice(float price) {    this.price = price + Resources.getSystem().getString(R.string.concurrency); }
     public void setDescription(String description) {    this.description = (description);    }
     public void setQuantity(int quantity) {
         this.quantity = (quantity);
@@ -102,7 +106,7 @@ public class Item implements Parcelable {
     public Item(int anId, String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory,List<String>tagsList) {
         id = (anId);
         name =  (aName);
-        price = aPrice + "€";
+        price = aPrice + Resources.getSystem().getString(R.string.concurrency);
         manufacturer =  (aManufacturer);
         description =  (aDescription);
         quantity = (aQuantity);
@@ -113,7 +117,7 @@ public class Item implements Parcelable {
 
     public Item( String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory) {
         name =  (aName);
-        price = aPrice + "€";
+        price = aPrice + Resources.getSystem().getString(R.string.concurrency);
         manufacturer =  (aManufacturer);
         description =  (aDescription);
         quantity = (aQuantity);

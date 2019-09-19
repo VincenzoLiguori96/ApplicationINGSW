@@ -146,21 +146,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
 
 
-    public void testCart(){
-        Cart cart = Cart.getInstance();
-        for(Item i : itemsList){
-            Log.e("AGGIUNGO","" + i.getName());
-            cart.addItemInCart(i, 1);
-        }
-        for(Pair<Item,Integer> coppia : cart.getPair()){
-            Log.e("VEDO COME è ORA: ", ""+coppia.first.toString() + coppia.second.toString());
-        }
-        Log.e("CANCELLO", itemsList.get(12).getName());
-        cart.deleteItemFromCart(itemsList.get(12));
-        for(Pair<Item,Integer> coppia : cart.getPair()){
-            Log.e("VEDO COME è dopo: ", ""+ coppia.first.toString() + coppia.second.toString());
-        }
-    }
+
 
 
     @Override
@@ -259,7 +245,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             refreshLayout.setRefreshing(false);
             itemsAdapter.notifyDataSetChanged();
         }
-        testCart();
     }
 
     public void openLeftMenu(){
