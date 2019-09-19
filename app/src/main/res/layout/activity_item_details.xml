@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <FrameLayout
+                android:id="@+id/productimage"
+                android:layout_width="match_parent"
+                android:layout_height="379dp"
+                android:elevation="4dp"
+                android:visibility="visible">
+
+
+                <ImageView
+                    android:layout_width="300dp"
+                    android:layout_height="238dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/ic_icon" />
+
+            </FrameLayout>
+
+
+            <LinearLayout
+                android:id="@+id/rating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/productimage"
+                android:background="#fff"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:visibility="visible">
+
+                <com.example.applicationingsw.customfonts.MyTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="$ 250"
+                    android:textColor="@color/black"
+                    android:textSize="30dp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rating"
+                android:background="#fff"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+
+                <com.example.applicationingsw.customfonts.MyTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="Name"
+                    android:textColor="@color/black"
+                    android:textSize="30dp" />
+
+                <com.example.applicationingsw.customfonts.MyTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_weight="1"
+                    android:text="Description"
+                    android:textColor="@color/Tex"
+                    android:textSize="16dp" />
+
+
+            </LinearLayout>
+
+
+            <!--*********color**********-->
+
+            <LinearLayout
+                android:id="@+id/colour"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/name"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:background="#fff"
+                android:orientation="vertical">
+
+                <com.example.applicationingsw.customfonts.MyTextView
+                    android:id="@+id/colortext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:text="Brand"
+                    android:textColor="@color/black"
+                    android:textSize="30dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Manufacturer"
+                    android:textColor="@color/Tex"
+                    android:textSize="16dp">
+
+                </TextView>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/colour"
+                android:layout_marginLeft="16dp"
+                android:background="#fff"
+                android:orientation="vertical">
+
+
+                <com.example.applicationingsw.customfonts.MyTextView
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    android:text="Quantity"
+                    android:textColor="@color/black"
+                    android:textSize="30dp" />
+
+                <LinearLayout
+                    android:id="@+id/qut"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/plus"
+                        android:layout_width="31dp"
+                        android:layout_height="31dp"
+                        android:layout_marginLeft="22dp"
+                        android:padding="2dp"
+                        android:src="@drawable/ic_plus" />
+
+                    <com.example.applicationingsw.customfonts.MyTextView
+                        android:id="@+id/quantityNumber"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:background="#00000000"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:maxLength="1"
+                        android:textColor="@color/black"
+                        android:textSize="16dp" />
+
+                    <ImageView
+                        android:id="@+id/minus"
+                        android:layout_width="31dp"
+                        android:layout_height="31dp"
+                        android:layout_marginLeft="16dp"
+                        android:padding="2dp"
+                        android:src="@drawable/ic_minus"
+                        />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <!--******add to cart******-->
+
+
+            <LinearLayout
+                android:id="@+id/save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/size"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:background="@color/white"
+                >
+                <com.example.applicationingsw.customfonts.MyTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:elevation="3dp"
+                    android:gravity="center"
+                    android:paddingBottom="12dp"
+                    android:paddingLeft="90dp"
+                    android:paddingRight="90dp"
+                    android:background="@drawable/rounded_button_background"
+                    android:paddingTop="12dp"
+                    android:text="ADD TO CART"
+                    android:textColor="@color/white"
+                    android:textSize="22dp" />
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

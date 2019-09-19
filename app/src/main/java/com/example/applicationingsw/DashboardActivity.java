@@ -63,9 +63,11 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        /*
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);*/
+
+
+        Intent intent = new Intent(getApplicationContext(), ItemDetailActivity.class);
+        startActivity(intent);
+
         leftSideMenu =findViewById( R.id.drawer_layout);
         filteredSearchImageView = findViewById(R.id.filteredSearch);
         filteredSearchImageView.setOnClickListener(new View.OnClickListener() {

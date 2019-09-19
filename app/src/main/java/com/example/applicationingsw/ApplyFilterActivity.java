@@ -236,7 +236,7 @@ public class ApplyFilterActivity extends Activity {
                             tags+=tagsList.get(i);
                         }
                         else{
-                            tags+="+"+tagsList.get(i);
+                            tags+=","+tagsList.get(i);
                         }
                     }
                 }

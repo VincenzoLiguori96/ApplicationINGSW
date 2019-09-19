@@ -1,11 +1,14 @@
 package com.example.applicationingsw.model;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Item {
+public class Item implements Parcelable {
 
     private Integer id;
     private String name;
@@ -20,6 +23,39 @@ public class Item {
     private boolean isNew = true;
 
 
+    protected Item(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readInt();
+        }
+        name = in.readString();
+        manufacturer = in.readString();
+        price = in.readString();
+        description = in.readString();
+        if (in.readByte() == 0) {
+            quantity = null;
+        } else {
+            quantity = in.readInt();
+        }
+        tags = in.createStringArrayList();
+        category = in.readString();
+        url = in.readString();
+        isLoading = in.readByte() != 0;
+        isNew = in.readByte() != 0;
+    }
+
+    public static final Creator<Item> CREATOR = new Creator<Item>() {
+        @Override
+        public Item createFromParcel(Parcel in) {
+            return new Item(in);
+        }
+
+        @Override
+        public Item[] newArray(int size) {
+            return new Item[size];
+        }
+    };
 
     public int getId() {
         return id;
@@ -121,5 +157,35 @@ public class Item {
     @Override
     public String toString(){
         return "Nome: " + getName();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        if (id == null) {
+            parcel.writeByte((byte) 0);
+        } else {
+            parcel.writeByte((byte) 1);
+            parcel.writeInt(id);
+        }
+        parcel.writeString(name);
+        parcel.writeString(manufacturer);
+        parcel.writeString(price);
+        parcel.writeString(description);
+        if (quantity == null) {
+            parcel.writeByte((byte) 0);
+        } else {
+            parcel.writeByte((byte) 1);
+            parcel.writeInt(quantity);
+        }
+        parcel.writeStringList(tags);
+        parcel.writeString(category);
+        parcel.writeString(url);
+        parcel.writeByte((byte) (isLoading ? 1 : 0));
+        parcel.writeByte((byte) (isNew ? 1 : 0));
     }
 }

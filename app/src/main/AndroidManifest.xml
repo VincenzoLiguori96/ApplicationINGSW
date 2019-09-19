@@ -15,6 +15,9 @@
         android:theme="@android:style/Theme.Material">
         <activity android:name=".ApplyFilterActivity"
             android:theme="@style/AppTheme.CustomPopup"></activity>
+        <activity android:name=".ItemDetailActivity"
+            android:theme="@android:style/Theme.Material">
+        </activity>
         <activity
             android:name=".LaunchActivity"
             android:theme="@android:style/Theme.Material">
