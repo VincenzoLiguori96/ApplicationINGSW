@@ -179,7 +179,6 @@ public class SignupActivity extends Activity {
 
                 // Check if this user (cognitoUser) needs to be confirmed
                 if(!userConfirmed) {
-                    // TODO: This user must be confirmed and a confirmation code was sent to the user,cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent, Get the confirmation code from user
                     Log.i(TAG, cognitoUserCodeDeliveryDetails.getDeliveryMedium() + " poi " + cognitoUserCodeDeliveryDetails.getAttributeName() + " poi "+ cognitoUserCodeDeliveryDetails.getDestination());
 
                     new android.os.Handler().postDelayed(

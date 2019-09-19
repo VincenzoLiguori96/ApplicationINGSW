@@ -1,7 +1,9 @@
 package com.example.applicationingsw;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,8 +22,14 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -36,12 +44,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class DashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemsAdapter.ItemsAdapterListener {
     private ItemsAdapter itemsAdapter;
     private ImageView menuImageView;
     private ImageView cartImageView;
     private ImageView filteredSearchImageView;
+    private String apiItemEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/items";
+    private static final int REQUEST_FILTER = 0;
     private SwipeRefreshLayout refreshLayout;
     private DrawerLayout leftSideMenu;
     private List<Item> itemsList = new ArrayList<>();
@@ -95,8 +106,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         //Bind RecyclerView from layout to recyclerViewProducts object
         recyclerViewProducts = findViewById(R.id.recyclerViewProducts);
 
-        //Create new itemsAdapter
-        itemsAdapter = new ItemsAdapter(this,this);
         //Create new GridLayoutManager
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this,
                 2,//span count no of items in single row
@@ -119,9 +128,11 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 }
             }
         });
-        loadItemsData();
+        itemsAdapter = new ItemsAdapter(this,this,itemsList);
+        loadItemsData(apiItemEndpoint);
         //add on on Scroll listener
         //add space between cards
+        //Create new itemsAdapter
         recyclerViewProducts.addItemDecoration(new Space(2, 20, true, 0));
         //Finally set the adapter
         recyclerViewProducts.setAdapter(itemsAdapter);
@@ -129,32 +140,41 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     }
 
     private void openApplyFilterView(){
-        Intent myIntent = new Intent(DashboardActivity.this, ApplyFilterActivity.class);
-        startActivity(myIntent);
+        // Start the Signup activity
+        Intent intent = new Intent(getApplicationContext(), ApplyFilterActivity.class);
+        startActivityForResult(intent, REQUEST_FILTER);
     }
-    //Load Data from your server here
-    // loading data from server will make it very large
-    // that's why i created data locally
-    private void loadItemsData() {
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent dataBack) {
+        if (requestCode == REQUEST_FILTER) {
+            if (resultCode == RESULT_OK) {
+                Bundle extras = dataBack.getExtras();
+                Item prova = null;
+                String query_string = extras.getString("EXTRA_QUERY_STRING");
+                String filteredEndpoint = apiItemEndpoint+query_string;
+                Log.e("API endpoint: ",filteredEndpoint);
+                itemsList.clear();
+                itemsAdapter.notifyDataSetChanged();
+                getItemsFromAPI(filteredEndpoint);
+
+            }
+        }
+    }
+
+
+    private void loadItemsData(String apiEndPoint) {
         //show loading in recyclerview
         itemsAdapter.showLoading();
-        getItemsFromAPI();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //hide loading
-                //TODO migliora
-                itemsAdapter.hideLoading();
-                //add products to recyclerview
-                itemsAdapter.addItems(itemsList);
-            }
-        }, 3000);
+        getItemsFromAPI(apiEndPoint);
     }
 
 
     public void refreshData(){
         itemsList.clear();
-        getItemsFromAPI();
+        getItemsFromAPI(apiItemEndpoint);
         itemsAdapter.addItems(itemsList);
         itemsAdapter.notifyDataSetChanged();
     }
@@ -163,10 +183,9 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    public void getItemsFromAPI(){
+    public void getItemsFromAPI(String endpoint){
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String apiItemEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/items";
-        final JsonObjectRequest request = new JsonObjectRequest(apiItemEndpoint, null, new Response.Listener<JSONObject>() {
+        final JsonObjectRequest request = new JsonObjectRequest(endpoint, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
@@ -190,14 +209,21 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                             }
                         }
                         Item currentItem = new Item(id,name,manufacturer,price,description,quantity,imageUrl,category,tags);
-                        currentItem.setNew(true);
+                        currentItem.setNew(new Random().nextBoolean());
                         itemsList.add(currentItem);
-                        for (Item it : itemsList){
-                            Log.e("ITEM", it.toString());
-                        }
+                        itemsAdapter.notifyDataSetChanged();
+
                     }
+                    itemsAdapter.hideLoading();
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("PORCA xception",e.getLocalizedMessage());
+                }
+                catch (Exception e){
+                    Log.e("PORCA MADO",response.toString());
+                    if(refreshLayout.isRefreshing()){
+                        refreshLayout.setRefreshing(false);
+                        itemsAdapter.notifyDataSetChanged();
+                    }
                 }
                 finally {
                     requestCompleted();
@@ -206,7 +232,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                manageNetworkingError(error);
             }
         });
         requestQueue.add(request);
@@ -215,6 +241,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     public void requestCompleted(){
         if(refreshLayout.isRefreshing()){
             refreshLayout.setRefreshing(false);
+            itemsAdapter.notifyDataSetChanged();
         }
     }
 
@@ -243,6 +270,44 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
         }
         return false;
+    }
+
+    public void manageNetworkingError(VolleyError error){
+        if(refreshLayout.isRefreshing()){
+            refreshLayout.setRefreshing(false);
+            itemsAdapter.notifyDataSetChanged();
+        }
+        itemsAdapter.showLoading();
+        String message = null;
+        if (error instanceof NetworkError) {
+            message = "Cannot connect to Internet...Please check your connection!";
+        } else if (error instanceof ServerError) {
+            message = "The server could not be found. Please try again after some time!";
+        } else if (error instanceof AuthFailureError) {
+            message = "Cannot connect to Internet...Please check your connection!";
+        } else if (error instanceof ParseError) {
+            message = "Parsing error! Please try again after some time!";
+        } else if (error instanceof NoConnectionError) {
+            message = "Cannot connect to Internet...Please check your connection!";
+        } else if (error instanceof TimeoutError) {
+            message = "Connection TimeOut! Please check your internet connection.";
+        }
+        else{
+            message = "Unknown connection error. Please retry.";
+        }
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage(message);
+        builder1.setCancelable(false);
+        builder1.setTitle("An error occured");
+        builder1.setPositiveButton(
+                "Ok",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
     }
 
     @Override

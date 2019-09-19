@@ -2,6 +2,7 @@ package com.example.applicationingsw;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -24,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -51,6 +53,7 @@ public class ApplyFilterActivity extends Activity {
     private RangeSeekBar priceRange ;
     private LinearLayout tagContainer ;
     private Spinner spinner ;
+    private ImageView closeImageView;
     private TextInputEditText manufacturerTextInput;
     private TextInputEditText keywordTextInput;
     private TextView doneTextView;
@@ -73,7 +76,6 @@ public class ApplyFilterActivity extends Activity {
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 if(textView.getText()!= null){
                     createTagButton(" "+textView.getText().toString());
-                    tagsList.add(textView.getText().toString());
                     textView.setText("");
                 }
                 return false;
@@ -83,7 +85,16 @@ public class ApplyFilterActivity extends Activity {
         doneTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(ApplyFilterActivity.this,getQueryStringParameters(), Toast.LENGTH_SHORT).show();
+                passFilterQueryBack(getQueryStringParameters());
+                finish();
+            }
+        });
+        closeImageView = findViewById(R.id.popup_exit);
+        closeImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(RESULT_CANCELED,null);
+                finish();
             }
         });
         priceRange.getRightSeekBar().setIndicatorTextDecimalFormat("0.00");
@@ -109,19 +120,48 @@ public class ApplyFilterActivity extends Activity {
     }
 
     public boolean anyFilterSelected(){
+
+        if(spinner.getSelectedItem() != null){
+            if(spinner.getSelectedItem().toString() != null && !spinner.getSelectedItem().toString().equals("") && !spinner.getSelectedItem().toString().equals("Select an item...")){
+                return true;
+            }
+        }
+        if(priceFilterSelected()){
+            return true;
+        }
+        if(isExactPrice()){
+            return true;
+        }
+        if(categorySelected())
+            return true;
+        if (tagsInserted())
+                return true;
+        if (manufacturerSelected())
+            return true;
+        return false;
+    }
+
+    public boolean manufacturerSelected(){
         if(manufacturerTextInput.getText() != null && !manufacturerTextInput.getText().equals("")){
             return true;
         }
-        if(spinner.getSelectedItem().toString() != null && !spinner.getSelectedItem().toString().equals("") && !spinner.getSelectedItem().toString().equals("Select an item...")){
-            return true;
-        }
-        if(priceRange.getLeftSeekBar().getProgress() != 0){
-            return true;
-        }
-        if(priceRange.getRightSeekBar().getProgress()!= 999.99){
-            return true;
-        }
+        return false;
+    }
+
+    public boolean tagsInserted(){
         if(!tagsList.isEmpty()){
+            for(String tag : tagsList){
+                if(!tag.equals("")){
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public boolean categorySelected(){
+        if(spinner.getSelectedItem().toString() != null && !spinner.getSelectedItem().toString().equals("") && !spinner.getSelectedItem().toString().equals("Select an item...")){
             return true;
         }
         return false;
@@ -165,7 +205,7 @@ public class ApplyFilterActivity extends Activity {
     }
 
     public String getQueryStringParameters(){
-        String queryString = "?";
+        String queryString = "?id=";
         String price="";
         String priceMin="";
         String priceMax="";
@@ -175,38 +215,40 @@ public class ApplyFilterActivity extends Activity {
         if(anyFilterSelected()){
             if (priceFilterSelected()){
                 if(isExactPrice()){
-                     price = "price="+priceRange.getLeftSeekBar().getProgress();
+                    price = "&price="+priceRange.getLeftSeekBar().getProgress();
                 }
                 else{
-                     priceMin = "priceMin="+getPriceMin();
-                     priceMax = "priceMax="+getPriceMax();
+                    priceMin = "&priceMin="+getPriceMin();
+                    priceMax = "&priceMax="+getPriceMax();
                 }
                 if(!manufacturerTextInput.getText().equals("") && manufacturerTextInput != null){
-                     manufacturer = "manufacturer=" + manufacturerTextInput.getText();
+                    manufacturer = "&manufacturer=" + manufacturerTextInput.getText();
                 }
-                if(spinner.getSelectedItem().toString() != null && !spinner.getSelectedItem().toString().equals("") && !spinner.getSelectedItem().toString().equals("Select an item...")){
-                     category = "category="+ spinner.getSelectedItem().toString();
+                if(spinner.getSelectedItem() != null){
+                    if(spinner.getSelectedItem().toString() != null && !spinner.getSelectedItem().toString().equals("") && !spinner.getSelectedItem().toString().equals("Select an item...")){
+                        category = "&category="+ spinner.getSelectedItem().toString();
+                    }
                 }
-                tags ="tags=";
+                tags ="&tags=";
                 if(!tagsList.isEmpty()){
-                    for(String tag : tagsList){
-                        tags +="+";
-                        tags+=tag;
+                    for(int i = 0 ; i< tagsList.size(); i++){
+                        if(i==0){
+                            tags+=tagsList.get(i);
+                        }
+                        else{
+                            tags+="+"+tagsList.get(i);
+                        }
                     }
                 }
             }
         }
-        queryString = category;
-        if(price!= ""){
-            queryString +="&"+price;
-        }
-        else{
-            queryString += "&"+priceMax+"&"+priceMin+"&"+manufacturer+"&"+tags;
-        }
+        queryString +=price + priceMin + manufacturer + category + priceMax + tags;
         return queryString;
     }
 
     private void createTagButton(String tagName){
+        String st = tagName;
+        tagsList.add(st.replaceAll("\\s+",""));
         Button buyButton = new Button(this);
         buyButton.setText(tagName);
         Drawable img = getDrawable(R.drawable.tag_button_icon);
@@ -331,5 +373,22 @@ public class ApplyFilterActivity extends Activity {
             }
         });
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for(String tag: tagsList){
+            Log.e("Tag: ",tag);
+        }
+        passFilterQueryBack(getQueryStringParameters());
+    }
+
+    public void passFilterQueryBack(String queryStringParams) {
+        Intent filterQuery = new Intent();
+        Bundle extras = new Bundle();
+        extras.putString("EXTRA_QUERY_STRING",queryStringParams);
+        filterQuery.putExtras(extras);
+        setResult(RESULT_OK,filterQuery);
     }
 }

@@ -2,6 +2,7 @@ package com.example.applicationingsw.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +29,20 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
     private ItemsAdapterListener listener;
 
 
-    public ItemsAdapter(Context mContext,ItemsAdapterListener listener) {
-        mItems = new ArrayList<>();
+    public ItemsAdapter(Context mContext,ItemsAdapterListener listener,List<Item> itemsList) {
+        mItems = itemsList;
         filteredItems = mItems;
         this.mContext = mContext;
         this.listener = listener;
 
+    }
+
+    public void changeAdapterData(List<Item> newItems){
+        this.mItems.clear();
+        this.filteredItems.clear();
+        this.mItems.addAll(newItems);
+        this.filteredItems.addAll(newItems);
+        this.notifyDataSetChanged();
     }
 
     //method to add Items as soon as they fetched 
@@ -75,13 +84,10 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
         if (holder instanceof ItemHolder) {
             ItemHolder ItemHolder = (ItemHolder) holder;
             //bind Items information with view
-            //TODO: Fetch dell'immagine
-            //Picasso.with(mContext).load(currentItem.getImageResourceId()).into(ItemHolder.imageViewItemThumb);
-            //TODO: Sostituisci con il fetch
             Picasso.with(mContext).load(currentItem.getUrl()).into(ItemHolder.imageViewItemThumb);
             ItemHolder.textViewItemName.setText(currentItem.getName());
             ItemHolder.textViewItemPrice.setText(currentItem.getPrice());
-            if (currentItem.isNew())
+            if (currentItem.isNew() && !currentItem.isLoading())
                 ItemHolder.textViewNew.setVisibility(View.VISIBLE);
             else
                 ItemHolder.textViewNew.setVisibility(View.GONE);
@@ -173,9 +179,10 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
 
     //method to show loading 
     public void showLoading() {
-        Item Item = new Item();
-        Item.setLoading(true);
-        mItems.add(Item);
+        Item item = new Item();
+        item.setLoading(true);
+        item.setNew(false);
+        mItems.add(item);
         LoadingItemPos = mItems.size();
         notifyItemInserted(mItems.size());
         loading = true;
