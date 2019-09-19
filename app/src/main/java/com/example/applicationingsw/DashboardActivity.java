@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -16,6 +15,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,8 +35,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.applicationingsw.adapters.ItemsAdapter;
 import com.example.applicationingsw.helpers.Space;
+import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.Item;
-import com.jaygoo.widget.RangeSeekBar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,11 +63,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-
-
-        Intent intent = new Intent(getApplicationContext(), ItemDetailActivity.class);
-        startActivity(intent);
-
         leftSideMenu =findViewById( R.id.drawer_layout);
         filteredSearchImageView = findViewById(R.id.filteredSearch);
         filteredSearchImageView.setOnClickListener(new View.OnClickListener() {
@@ -89,6 +84,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             }
         });
         setSearchManager();
+        //TODO creare una classe statica in cui mettere questi metodi di inizializzazione del menu a toolbar?
         menuImageView = findViewById(R.id.leftMenuImage);
         menuImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,6 +135,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         //Finally set the adapter
         recyclerViewProducts.setAdapter(itemsAdapter);
 
+
     }
 
     private void openApplyFilterView(){
@@ -147,6 +144,23 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         startActivityForResult(intent, REQUEST_FILTER);
     }
 
+
+
+    public void testCart(){
+        Cart cart = Cart.getInstance();
+        for(Item i : itemsList){
+            Log.e("AGGIUNGO","" + i.getName());
+            cart.addItemInCart(i, 1);
+        }
+        for(Pair<Item,Integer> coppia : cart.getPair()){
+            Log.e("VEDO COME è ORA: ", ""+coppia.first.toString() + coppia.second.toString());
+        }
+        Log.e("CANCELLO", itemsList.get(12).getName());
+        cart.deleteItemFromCart(itemsList.get(12));
+        for(Pair<Item,Integer> coppia : cart.getPair()){
+            Log.e("VEDO COME è dopo: ", ""+ coppia.first.toString() + coppia.second.toString());
+        }
+    }
 
 
     @Override
@@ -245,6 +259,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             refreshLayout.setRefreshing(false);
             itemsAdapter.notifyDataSetChanged();
         }
+        testCart();
     }
 
     public void openLeftMenu(){
@@ -315,7 +330,9 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     @Override
     public void onItemSelected(Item item) {
         //TODO vai alla schermata dettaglio
-        Toast.makeText(getApplicationContext(), "Selected: " + item.getName() + ", " + item.getCategory(), Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(getApplicationContext(), ItemDetailActivity.class);
+        intent.putExtra("CurrentItem", item);
+        startActivity(intent);
     }
     
     public void setSearchManager(){
