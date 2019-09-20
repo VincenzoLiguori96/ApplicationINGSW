@@ -214,14 +214,14 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                         currentItem.setNew(new Random().nextBoolean());
                         itemsList.add(currentItem);
                         itemsAdapter.notifyDataSetChanged();
-
+                        Log.e("ALLA FINE GLI ",String.valueOf(itemsAdapter.getItemCount()));
                     }
                     itemsAdapter.hideLoading();
                 } catch (JSONException e) {
                     Log.e("PORCA xception",e.getLocalizedMessage());
                 }
                 catch (Exception e){
-                    Log.e("PORCA MADO",response.toString());
+                    Log.e("PORCA MADO",e.toString(),e);
                     if(refreshLayout.isRefreshing()){
                         refreshLayout.setRefreshing(false);
                         itemsAdapter.notifyDataSetChanged();
@@ -244,6 +244,9 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         if(refreshLayout.isRefreshing()){
             refreshLayout.setRefreshing(false);
             itemsAdapter.notifyDataSetChanged();
+            itemsAdapter.hideLoading();
+            recyclerViewProducts.setAdapter(itemsAdapter);
+            Log.e("ALLA FINE GLI ",String.valueOf(itemsAdapter.getItemCount()));
         }
     }
 

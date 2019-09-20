@@ -4,7 +4,9 @@ package com.example.applicationingsw.model;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import com.example.applicationingsw.App;
 import com.example.applicationingsw.R;
 
 import java.util.ArrayList;
@@ -106,7 +108,7 @@ public class Item implements Parcelable {
     public Item(int anId, String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory,List<String>tagsList) {
         id = (anId);
         name =  (aName);
-        price = aPrice + Resources.getSystem().getString(R.string.concurrency);
+        price = aPrice + App.getAppContext().getResources().getString(R.string.concurrency);
         manufacturer =  (aManufacturer);
         description =  (aDescription);
         quantity = (aQuantity);

@@ -3,6 +3,7 @@ package com.example.applicationingsw.model;
 import android.content.res.Resources;
 import android.util.Pair;
 
+import com.example.applicationingsw.PaymentMethod;
 import com.example.applicationingsw.R;
 
 import java.util.ArrayList;
@@ -63,6 +64,11 @@ public class Cart {
                 break;
             }
         }
+    }
+    public void pay(PaymentMethod method) {
+
+        float totalCost = calculateTotalPrice();
+        method.pay(totalCost);
     }
 }
 

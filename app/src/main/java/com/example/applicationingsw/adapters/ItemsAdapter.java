@@ -10,7 +10,6 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.Item;
 import com.squareup.picasso.Picasso;
@@ -55,10 +54,15 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
 
     @Override
     public int getItemViewType(int position) {
-        Item currentItem = mItems.get(position);
-        if (currentItem.isLoading()) {
-            return LOADING_ITEM;
-        } else {
+        try {
+            Item currentItem = mItems.get(position);
+            if (currentItem.isLoading()) {
+                return LOADING_ITEM;
+            } else {
+                return PRODUCT_ITEM;
+            }
+        }
+        catch(IndexOutOfBoundsException e) {
             return PRODUCT_ITEM;
         }
     }
@@ -66,7 +70,7 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        //Check which view has to be populated 
+        //Check which view has to be populated
         if (viewType == LOADING_ITEM) {
             View row = inflater.inflate(R.layout.custom_item_row, parent, false);
             return new LoadingHolder(row);
@@ -80,26 +84,29 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         //get current Item
-        final Item currentItem = filteredItems.get(position);
-        if (holder instanceof ItemHolder) {
-            ItemHolder ItemHolder = (ItemHolder) holder;
-            //bind Items information with view
-            Picasso.with(mContext).load(currentItem.getUrl()).into(ItemHolder.imageViewItemThumb);
-            ItemHolder.textViewItemName.setText(currentItem.getName());
-            ItemHolder.textViewItemPrice.setText(currentItem.getPriceWithConcurrency());
-            if (currentItem.isNew() && !currentItem.isLoading())
-                ItemHolder.textViewNew.setVisibility(View.VISIBLE);
-            else
-                ItemHolder.textViewNew.setVisibility(View.GONE);
+        if(filteredItems!=null){
+            final Item currentItem = filteredItems.get(position);
+            if (holder instanceof ItemHolder) {
+                ItemHolder ItemHolder = (ItemHolder) holder;
+                //bind Items information with view
+                Picasso.with(mContext).load(currentItem.getUrl()).into(ItemHolder.imageViewItemThumb);
+                ItemHolder.textViewItemName.setText(currentItem.getName());
+                ItemHolder.textViewItemPrice.setText(currentItem.getPriceWithConcurrency());
+                if (currentItem.isNew() && !currentItem.isLoading())
+                    ItemHolder.textViewNew.setVisibility(View.VISIBLE);
+                else
+                    ItemHolder.textViewNew.setVisibility(View.GONE);
 
-            ItemHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // send selected contact in callback
-                    listener.onItemSelected(filteredItems.get(position));
-                }
-            });
+                ItemHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // send selected contact in callback
+                        listener.onItemSelected(filteredItems.get(position));
+                    }
+                });
+            }
         }
+
 
     }
 
@@ -109,7 +116,12 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
 
     @Override
     public int getItemCount() {
-        return filteredItems.size();
+        if(filteredItems!=null){
+            return filteredItems.size();
+        }
+        else{
+            return mItems.size();
+        }
     }
 
     @Override
