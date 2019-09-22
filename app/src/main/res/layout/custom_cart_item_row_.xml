@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/itemImageCheckout"
+            android:layout_width="217px"
+            android:layout_height="217px"
+            android:gravity="center"
+            />
+
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="11dp"
+            android:paddingLeft="16dp"
+            >
+
+            <TextView
+
+                android:id="@+id/title"
+                android:maxLines="2"
+                android:textSize="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/black"
+                android:text="Lemon peel Base ball"/>
+
+
+            <TextView
+                android:id="@+id/quantityLabel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="16dp"
+                android:text="Quantity"
+                android:textColor="@color/black"
+                android:textSize="12dp" />
+
+            <TextView
+                android:id="@+id/itemQuantity"
+                android:textSize="14dp"
+                android:textColor="@color/black"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="$ 250.00"
+                android:paddingTop="16dp"
+                />
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:gravity="center"
+            >
+
+
+            <TextView
+                android:id="@+id/itemPrice"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="01"
+                android:textSize="16dp"
+                android:textColor="@color/black"
+                android:gravity="center"
+                />
+
+            <!--<ImageView-->
+            <!--android:id="@+id/min"-->
+            <!--android:layout_width="21dp"-->
+            <!--android:layout_height="21dp"-->
+            <!--android:src="@drawable/minus"-->
+
+            <!--/>-->
+
+
+        </LinearLayout>
+
+
+
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

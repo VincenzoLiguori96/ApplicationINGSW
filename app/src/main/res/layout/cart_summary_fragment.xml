@@ -15,43 +15,41 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#FFFF"
             android:orientation="vertical"
-            android:padding="16dp"
-            >
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
                 android:gravity="center"
+                android:orientation="horizontal"
 
                 >
 
 
-
                 <TextView
-                    android:layout_weight="1"
                     android:id="@+id/shipping"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textStyle="bold"
                     android:text="SHIPPING TO:"
-                    android:textSize="12dp"
-                    />
-
-
+                    android:textColor="#635E5E"
+                    android:textSize="12dp" />
 
 
                 <TextView
 
                     android:id="@+id/edit"
-                    android:layout_weight="0.6"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="0.6"
                     android:background="#00000000"
-                    android:textSize="12dp"
-                    android:textColor="#51a3df"
-                    android:text="EDIT"
                     android:gravity="right"
+                    android:text="EDIT"
+                    android:textColor="#51a3df"
+                    android:textSize="12dp"
 
                     />
 
@@ -59,26 +57,24 @@
             </LinearLayout>
 
 
-
-
-
             <TextView
-                android:paddingTop="16dp"
+                android:id="@+id/buyerName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingTop="16dp"
                 android:text="Ester Smith"
-                android:textSize="16dp"
                 android:textColor="#333333"
-                />
+                android:textSize="16dp"
+                android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/buyerAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="309, Baker Street, 390022 NY"
-                android:textSize="16dp"
                 android:textColor="#333333"
-                />
-
+                android:textSize="16dp"
+                android:textStyle="bold" />
 
 
         </LinearLayout>
@@ -125,39 +121,39 @@
         >
 
 
-        <TextView
-            android:layout_weight="1"
-            android:id="@+id/total1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TOTAL AMOUNT"
-            android:textSize="12dp"
-            android:textColor="#333333"
+            <TextView
+                android:layout_weight="1"
+                android:id="@+id/total1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TOTAL AMOUNT"
+                android:textSize="12dp"
+                android:textColor="#333333"
 
-            />
+                />
 
 
 
-        <TextView
+            <TextView
 
-            android:id="@+id/total2"
-            android:layout_weight="0.6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#00000000"
-            android:textSize="18dp"
-            android:textColor="#333333"
-            android:text="$ 858.00"
-            android:gravity="right"
+                android:id="@+id/total2"
+                android:layout_weight="0.6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                android:textSize="18dp"
+                android:textColor="#333333"
+                android:text="$ 858.00"
+                android:gravity="right"
 
-            />
+                />
 
 
 
     </LinearLayout>
 
 
-
+    
 
     <TextView
         android:id="@+id/pay"
@@ -170,7 +166,7 @@
         android:padding="16dp"
         android:gravity="center"
         android:layout_alignParentBottom="true"
-        android:drawableRight="@drawable/ic_arrow_back_white"
+        android:drawableRight="@drawable/ic_go_next"
         />
 
 

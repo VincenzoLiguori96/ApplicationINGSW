@@ -128,7 +128,7 @@
 
 
                             <LinearLayout
-                                android:id="@+id/name"
+                                android:id="@+id/buyerName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_below="@+id/rating"
@@ -166,7 +166,7 @@
                                 android:id="@+id/colour"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@+id/name"
+                                android:layout_below="@+id/buyerName"
                                 android:layout_alignParentStart="true"
                                 android:layout_marginStart="16dp"
                                 android:layout_marginLeft="16dp"

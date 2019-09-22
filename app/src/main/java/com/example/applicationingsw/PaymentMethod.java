@@ -1,6 +1,8 @@
 package com.example.applicationingsw;
 
+import android.content.Intent;
+
 //TODO a chi farla implementare?
 public interface PaymentMethod {
-    public void pay(float amount);
+    public Intent pay(float amount);
 }

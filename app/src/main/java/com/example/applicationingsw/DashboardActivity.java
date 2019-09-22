@@ -72,6 +72,10 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             }
         });
         setNavigationViewListener();
+
+        Intent i = new Intent(this,CartActivity.class);
+        startActivity(i);
+
         searchView = findViewById(R.id.action_search_dashboard);
         searchView.setBackgroundResource(R.drawable.rect_rounded_white);
         filteredSearchImageView = findViewById(R.id.filteredSearch);
