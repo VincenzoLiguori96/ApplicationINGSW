@@ -49,9 +49,9 @@
                     android:gravity="right"
                     android:text="EDIT"
                     android:textColor="#51a3df"
-                    android:textSize="12dp"
+                    android:textSize="16dp"
 
-                    />
+                    android:textStyle="bold" />
 
 
             </LinearLayout>
@@ -62,7 +62,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"
-                android:text="Ester Smith"
                 android:textColor="#333333"
                 android:textSize="16dp"
                 android:textStyle="bold" />
@@ -71,7 +70,6 @@
                 android:id="@+id/buyerAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="309, Baker Street, 390022 NY"
                 android:textColor="#333333"
                 android:textSize="16dp"
                 android:textStyle="bold" />
@@ -85,24 +83,21 @@
             android:gravity="bottom"/>
 
 
-
         <ListView
 
-            android:layout_marginBottom="89dp"
             android:id="@+id/listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+            android:layout_marginBottom="89dp"
+            android:background="#FFFF" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#dad8d8"
-        android:gravity="bottom"
-        android:layout_above="@+id/amount"
         android:elevation="1dp"
-        />
+        android:gravity="bottom" />
 
 
 

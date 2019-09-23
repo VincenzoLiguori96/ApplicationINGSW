@@ -8,11 +8,15 @@ import com.example.applicationingsw.ShippingTabFragment;
 import com.example.applicationingsw.SummaryTabFragment;
 
 public class CheckoutPageAdapter extends FragmentStatePagerAdapter {
-    int mNumOfTabs;
+    private int mNumOfTabs;
+    private SummaryTabFragment tab1;
+    private ShippingTabFragment  tab2;
 
     public CheckoutPageAdapter(FragmentManager fm, int NumOfTabs) {
         super(fm);
         this.mNumOfTabs = NumOfTabs;
+        tab1 = new SummaryTabFragment();
+        tab2 = new ShippingTabFragment();
     }
 
     @Override
@@ -20,10 +24,8 @@ public class CheckoutPageAdapter extends FragmentStatePagerAdapter {
 
         switch (position) {
             case 0:
-                ShippingTabFragment tab1 = new ShippingTabFragment();
                 return tab1;
             case 1:
-                SummaryTabFragment tab2 = new SummaryTabFragment();
                 return tab2;
             default:
                 return null;

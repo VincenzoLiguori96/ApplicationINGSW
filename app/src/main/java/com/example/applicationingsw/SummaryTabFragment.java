@@ -1,19 +1,27 @@
 package com.example.applicationingsw;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.example.applicationingsw.Services.PaypalConfigurationService;
 import com.example.applicationingsw.adapters.CartAdapter;
 import com.example.applicationingsw.model.Cart;
+import com.example.applicationingsw.model.CognitoUserPoolShared;
+import com.example.applicationingsw.model.Customer;
 import com.example.applicationingsw.model.Item;
 import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
@@ -35,12 +43,12 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     private TextView editShippingDetailsButton;
     private TextView amount;
     private TextView payButton;
+    private Customer currentCustomer;
     private int[] IMAGE = {R.drawable.cio_card_io_logo, R.drawable.ic_list, R.drawable.ic_close_tag,
             R.drawable.ic_add_to_cart, R.drawable.ic_cart};
-    private String[] TITLE = {"Teak & Steel Petanque Set", "Lemon Peel Baseball", "Seil Marschall Hiking Pack", "Teak & Steel Petanque Set", "Lemon Peel Baseball"};
-    private String[] DESCRIPTION = {"One Size", "One Size", "Size L", "One Size", "One Size"};
-    private String[] DATE = {"$ 220.00","$ 49.00","$ 320.00","$ 220.00","$ 49.00"};
     private CartAdapter baseAdapter;
+
+    public SummaryTabFragment(){};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,17 +57,26 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         buyerAddress = summaryView.findViewById((R.id.buyerAddress));
         buyerName = summaryView.findViewById(R.id.buyerName);
         amount = summaryView.findViewById(R.id.amount);
+        getUserData();
+        amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ App.getAppContext().getString(R.string.concurrency));
         payButton = summaryView.findViewById(R.id.payButton);
+        payButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String amountWithoutConcurrency = amount.getText().toString().replaceAll(App.getAppContext().getString(R.string.concurrency),"");
+                pay(Float.valueOf(amountWithoutConcurrency.toString()));
+            }
+        });
         editShippingDetailsButton = summaryView.findViewById(R.id.editButton);
+        editShippingDetailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                turnBackToShippingDetails();
+            }
+        });
         Intent intent = new Intent(getActivity(), PayPalService.class);
         intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PaypalConfigurationService.getConfig());
         getActivity().startService(intent);
-        for (int i= 0; i< TITLE.length; i++){
-            Item currentItem = new Item(2,TITLE[i],DESCRIPTION[i],99.99f,DESCRIPTION[i],32,"https://cdn-media.italiani.it/site-matera/2019/02/San-Gerardo-Maiella.jpg","Sacred objects",new ArrayList<String>());
-            Cart.getInstance().addItemInCart(currentItem,23);
-        }
-
-
         baseAdapter = new CartAdapter(getActivity(), Cart.getInstance()) {
         };
 
@@ -76,16 +93,36 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
      */
     @Override
     public void pay(float amount) {
-        PayPalPayment payment = new PayPalPayment(new BigDecimal("1.75"), "USD", "hipster jeans",
-                PayPalPayment.PAYMENT_INTENT_SALE);
+        if(amount>0){
+            String description = "" ;
+            for(Pair<Item,Integer> itemInCart : Cart.getInstance().getItemsInCart()){
+                description += itemInCart.first.getName() + "n." + itemInCart.second +",";
+            }
+            description = description.substring(0,description.lastIndexOf(","));
+            PayPalPayment payment = new PayPalPayment(new BigDecimal(Cart.getInstance().calculateTotalPrice()), App.getAppContext().getString(R.string.concurrency), description,
+                    PayPalPayment.PAYMENT_INTENT_SALE);
 
-        Intent intent = new Intent(App.getAppContext(), PaymentActivity.class);
+            Intent intent = new Intent(App.getAppContext(), PaymentActivity.class);
 
-        // send the same configuration for restart resiliency
-        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PaypalConfigurationService.getConfig());
+            // send the same configuration for restart resiliency
+            intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PaypalConfigurationService.getConfig());
 
-        intent.putExtra(PaymentActivity.EXTRA_PAYMENT, payment);
-        startActivityForResult(intent, 0);
+            intent.putExtra(PaymentActivity.EXTRA_PAYMENT, payment);
+            startActivityForResult(intent, 0);
+        }
+        else {
+            new AlertDialog.Builder(getContext())
+                    .setTitle("No items in cart.")
+                    .setMessage("Are you sure you added something?")
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            getActivity().finish();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 
     @Override
@@ -118,5 +155,53 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     public void onDestroy() {
         super.onDestroy();
         getActivity().stopService(new Intent(getActivity(), PayPalService.class));
+    }
+
+
+    public void  displayShippingInfo(Customer ofCustomer){
+        currentCustomer = ofCustomer;
+        buyerName.setText(ofCustomer.getName() + " " + ofCustomer.getSurname());
+        buyerAddress.setText(ofCustomer.getCity() + ", " + ofCustomer.getAddress());
+    }
+
+    public void turnBackToShippingDetails(){
+        try {
+            ShippingTabFragment.SendCustomer paymentToShippingFragment = (ShippingTabFragment.SendCustomer) getActivity();
+            paymentToShippingFragment.send(currentCustomer,0);
+            CartActivity myActivity = (CartActivity) getActivity();
+            myActivity.changeTab(0);
+        } catch (ClassCastException e) {
+            CartActivity myActivity = (CartActivity) getActivity();
+            myActivity.changeTab(0);
+        }
+    }
+
+    public void getUserData(){
+        GetDetailsHandler handler = new GetDetailsHandler() {
+            @Override
+            public void onSuccess(final CognitoUserDetails list) {
+                // Successfully retrieved user details
+                String savedEmail = list.getAttributes().getAttributes().get("email");
+                String savedName = list.getAttributes().getAttributes().get("name");
+                String savedSurname = list.getAttributes().getAttributes().get("family_name");
+                String savedAddress = list.getAttributes().getAttributes().get("address");
+                String savedCity = list.getAttributes().getAttributes().get("locale");
+                Customer customer = new Customer(savedName,savedSurname,savedAddress,savedEmail,"",savedCity);
+                ShippingTabFragment.SendCustomer customerToPaymentFragment = (ShippingTabFragment.SendCustomer) getActivity();
+                displayShippingInfo(customer);
+                customerToPaymentFragment.send(customer,1);
+            }
+
+            @Override
+            public void onFailure(final Exception exception) {
+                // Failed to retrieve the user details, probe exception for the cause
+                Log.e("Exc dettagli utente",exception.toString());
+                Customer customer = new Customer("","","","","","");
+                ShippingTabFragment.SendCustomer customerToPaymentFragment = (ShippingTabFragment.SendCustomer) getActivity();
+                customerToPaymentFragment.send(customer,1);
+            }
+        };
+        CognitoUser curr = CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser();
+        CognitoUserPoolShared.getInstance().getUserPool().getUser(curr.getUserId()).getDetailsInBackground(handler);
     }
 }

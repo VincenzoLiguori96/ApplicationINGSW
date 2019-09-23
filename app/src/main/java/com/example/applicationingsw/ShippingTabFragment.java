@@ -16,6 +16,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttribu
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
+import com.example.applicationingsw.model.Customer;
 
 import java.util.Map;
 
@@ -28,15 +29,17 @@ public class ShippingTabFragment extends Fragment {
     private TextView email;
     private TextView phoneNumber;
     private TextView address;
+    private TextView city;
     private TextView continueButton;
     private View shippingTab;
-
+    private Customer currentCustomer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
          shippingTab = inflater.inflate(R.layout.shipping_fragment, container, false);
          name = shippingTab.findViewById(R.id.firstNameTextView);
          email = shippingTab.findViewById(R.id.emailTextView);
+         city = shippingTab.findViewById(R.id.cityTextView);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             email.setTooltipText("The email will be used for communications about the order.");
         }
@@ -69,28 +72,6 @@ public class ShippingTabFragment extends Fragment {
                  continueButtonPressed();
              }
          });
-        GetDetailsHandler handler = new GetDetailsHandler() {
-            @Override
-            public void onSuccess(final CognitoUserDetails list) {
-                // Successfully retrieved user details
-                String savedEmail = list.getAttributes().getAttributes().get("email");
-                email.setText(savedEmail);
-                String savedName = list.getAttributes().getAttributes().get("name");
-                name.setText(savedName);
-                String savedSurname = list.getAttributes().getAttributes().get("family_name");
-                surname.setText(savedSurname);
-                String savedAddress = list.getAttributes().getAttributes().get("locale") + " " + list.getAttributes().getAttributes().get("address");
-                address.setText(savedAddress);
-            }
-
-            @Override
-            public void onFailure(final Exception exception) {
-                // Failed to retrieve the user details, probe exception for the cause
-                Log.e("Exc dettagli utente",exception.toString());
-            }
-        };
-        CognitoUser curr = CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser();
-        CognitoUserPoolShared.getInstance().getUserPool().getUser(curr.getUserId()).getDetailsInBackground(handler);
         return shippingTab;
     }
 
@@ -98,7 +79,16 @@ public class ShippingTabFragment extends Fragment {
 
     public void continueButtonPressed(){
         if(validate()){
-            //TODO passa al tab del riepilogo passandogli i dati di spedizione
+            Customer customer = new Customer(name.getText().toString(),surname.getText().toString(),address.getText().toString(),email.getText().toString(),"",city.getText().toString());
+            try {
+                SendCustomer customerToPaymentFragment = (SendCustomer) getActivity();
+                customerToPaymentFragment.send(customer,0);
+                CartActivity myActivity = (CartActivity) getActivity();
+                myActivity.changeTab(0);
+            } catch (ClassCastException e) {
+                CartActivity myActivity = (CartActivity) getActivity();
+                myActivity.changeTab(0);
+            }
         }
     }
 
@@ -110,6 +100,7 @@ public class ShippingTabFragment extends Fragment {
         String emailString = email.getText().toString();
         String surnameString = surname.getText().toString();
         String addressString = address.getText().toString();
+        String cityString = city.getText().toString();
 
         if (nameString.isEmpty()) {
             name.setError("Insert a name!");
@@ -137,6 +128,26 @@ public class ShippingTabFragment extends Fragment {
         } else {
             address.setError(null);
         }
+        if (cityString.isEmpty()) {
+            city.setError("Enter a city.");
+            valid = false;
+        } else {
+            city.setError(null);
+        }
         return valid;
     }
+
+    public void  displayPassedShippingInfo(Customer ofCustomer){
+        email.setText(ofCustomer.getEmail());
+        name.setText(ofCustomer.getName());
+        surname.setText(ofCustomer.getSurname());
+        city.setText(ofCustomer.getCity());
+        address.setText(ofCustomer.getAddress());
+    }
+
+    interface SendCustomer{
+        public void send(Customer aCustomer,int toPage);
+        public void updateData(Customer aCustomer);
+    }
+
 }

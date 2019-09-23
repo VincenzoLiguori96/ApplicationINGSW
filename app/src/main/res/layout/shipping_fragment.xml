@@ -223,15 +223,11 @@
                 android:padding="16dp"
 
                 >
-
-
-
                     <TextView
                         android:layout_weight="1"
-                        android:id="@+id/address1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="ADDRESS"
+                        android:text="CITY"
                         android:textSize="12dp"
                         android:textColor="@color/black" />
 
@@ -243,7 +239,7 @@
 
                     <EditText
 
-                        android:id="@+id/addressTextView"
+                        android:id="@+id/cityTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="#333333"
@@ -259,29 +255,50 @@
                 </LinearLayout>
             </LinearLayout>
 
-
-            <!--******zip********-->
-
-
             <!--******CITY********-->
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="16dp"
 
-            <!--******CITY********-->
-
-
-            <HorizontalScrollView
-               android:id="@+id/horizontalview"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:background="#fbfaff"
-               android:scrollbars="none"
-               >
+                >
 
 
 
+                <TextView
+                    android:layout_weight="1"
+                    android:id="@+id/address1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ADDRESS"
+                    android:textSize="12dp"
+                    android:textColor="@color/black" />
 
+                <LinearLayout
+                    android:layout_weight="0.6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-           </HorizontalScrollView>
+                    <EditText
+
+                        android:id="@+id/addressTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#333333"
+                        android:background="#00000000"
+                        android:inputType="textMultiLine"
+                        />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#dad8d8" />
+
+                </LinearLayout>
+            </LinearLayout>
 
 
 

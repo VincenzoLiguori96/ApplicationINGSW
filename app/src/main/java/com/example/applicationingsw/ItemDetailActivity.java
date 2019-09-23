@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.applicationingsw.Services.CartAccessService;
 import com.example.applicationingsw.model.Item;
 import com.squareup.picasso.Picasso;
 
@@ -132,7 +133,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
                 finish();
                 return true;
             case R.id.nav_cart:
-                //TODO vai al carrello
+                CartAccessService.goToCart(getApplicationContext(),this);
                 return true;
             case R.id.nav_categories:
                 //TODO vai alla ricerca per categorie
@@ -147,6 +148,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         }
         return false;
     }
+
 
     public void openLeftMenu(){
         leftSideMenu.openDrawer(Gravity.START);
