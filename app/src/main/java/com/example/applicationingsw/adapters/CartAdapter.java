@@ -75,8 +75,6 @@ public class CartAdapter extends BaseAdapter {
         }
 
         Pair<Item,Integer> itemInCart = (Pair<Item,Integer>)getItem(position);
-        Picasso.with(context).setLoggingEnabled(true);
-        //TODO sistema le viste
         Picasso.with(context).load(itemInCart.first.getUrl()).resize(217,217).into(viewHolder.image);
         viewHolder.title.setText(itemInCart.first.getName());
         float totalPrice = itemInCart.first.getPriceWithoutConcurrency() * itemInCart.second;

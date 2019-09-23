@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.applicationingsw.Services.CartAccessService;
+import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.Item;
 import com.squareup.picasso.Picasso;
 
@@ -57,15 +58,14 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         cartImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: vai al carrello
-                Toast.makeText(ItemDetailActivity.this, "Go to cart clicked", Toast.LENGTH_LONG).show();
+                goToCart();
             }
         });
         addToCartImageView = findViewById(R.id.addToCartRapidButton);
         addToCartImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO Aggiungi al Carrello
+                addToCart(currentItem);
             }
         });
         productImage = findViewById(R.id.productimage);
@@ -98,8 +98,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         addToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO Aggiungi al Carrello
-                Toast.makeText(ItemDetailActivity.this, "Add to cart clicked", Toast.LENGTH_LONG).show();
+                addToCart(currentItem);
             }
         });
 
@@ -149,7 +148,15 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         return false;
     }
 
+    public void addToCart(Item itemToAdd){
+        Toast.makeText(getApplicationContext(),itemToAdd.getName() + " added", Toast.LENGTH_SHORT).show();
+        int quantity = Integer.valueOf(quantityTextView.getText().toString());
+        Cart.getInstance().addItemInCart(itemToAdd,quantity);
+    }
 
+    public void goToCart(){
+        CartAccessService.goToCart(getApplicationContext(),this);
+    }
     public void openLeftMenu(){
         leftSideMenu.openDrawer(Gravity.START);
     }

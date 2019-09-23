@@ -33,6 +33,7 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.applicationingsw.Services.CartAccessService;
 import com.example.applicationingsw.adapters.ItemsAdapter;
 import com.example.applicationingsw.helpers.Space;
 import com.example.applicationingsw.model.Cart;
@@ -96,8 +97,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         cartImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: vai al carrello
-                Toast.makeText(DashboardActivity.this, "Go to cart clicked", Toast.LENGTH_LONG).show();
+                goToCart();
             }
         });
 
@@ -261,7 +261,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 leftSideMenu.closeDrawer(Gravity.START);
                 return true;
             case R.id.nav_cart:
-                //TODO vai al carrello
+                goToCart();
                 return true;
             case R.id.nav_categories:
                 //TODO vai alla ricerca per categorie
@@ -348,5 +348,9 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 return false;
             }
         });
+    }
+
+    public void goToCart(){
+        CartAccessService.goToCart(getApplicationContext(),this);
     }
 }

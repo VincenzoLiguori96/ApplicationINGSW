@@ -71,7 +71,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         editShippingDetailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                turnBackToShippingDetails();
+                goToShippingDetails();
             }
         });
         Intent intent = new Intent(getActivity(), PayPalService.class);
@@ -127,6 +127,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //TODO aggiornare il db con l'ordine + mandare email riepilogo.
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             PaymentConfirmation confirm = data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
@@ -134,9 +135,6 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                 try {
                     Log.i("paymentExample", confirm.toJSONObject().toString(4));
 
-                    // TODO: send 'confirm' to your server for verification.
-                    // see https://developer.paypal.com/webapps/developer/docs/integration/mobile/verify-mobile-payment/
-                    // for more details.
                 } catch (JSONException e) {
                     Log.e("paymentExample", "an extremely unlikely failure occurred: ", e);
                 }
@@ -164,15 +162,15 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         buyerAddress.setText(ofCustomer.getCity() + ", " + ofCustomer.getAddress());
     }
 
-    public void turnBackToShippingDetails(){
+    public void goToShippingDetails(){
         try {
             ShippingTabFragment.SendCustomer paymentToShippingFragment = (ShippingTabFragment.SendCustomer) getActivity();
-            paymentToShippingFragment.send(currentCustomer,0);
+            paymentToShippingFragment.send(currentCustomer,1);
             CartActivity myActivity = (CartActivity) getActivity();
-            myActivity.changeTab(0);
+            myActivity.changeTab(1);
         } catch (ClassCastException e) {
             CartActivity myActivity = (CartActivity) getActivity();
-            myActivity.changeTab(0);
+            myActivity.changeTab(1);
         }
     }
 

@@ -30,7 +30,18 @@ public class Cart {
     }
 
     public void addItemInCart(Item anItem, Integer aQuantity){
-        itemsInCart.add(Pair.create(anItem, aQuantity));
+        boolean alreadyInCart = false;
+        for(Pair<Item,Integer> itemInCart : itemsInCart){
+            if(itemInCart.first.getId()== anItem.getId()){
+                alreadyInCart = true;
+            }
+        }
+        if(alreadyInCart){
+            updateItemInCart(anItem,aQuantity);
+        }
+        else{
+            itemsInCart.add(Pair.create(anItem, aQuantity));
+        }
     }
 
     public List<Pair<Item,Integer>> getItemsInCart(){
@@ -60,7 +71,7 @@ public class Cart {
     public void updateItemInCart(Item anItem,Integer newQuantity){
         for(int i = 0; i<itemsInCart.size(); i++){
             if(itemsInCart.get(i).first.equals(anItem)){
-                itemsInCart.set(i,Pair.create(anItem,newQuantity));
+                itemsInCart.set(i,Pair.create(anItem,newQuantity+itemsInCart.get(i).second));
                 break;
             }
         }
