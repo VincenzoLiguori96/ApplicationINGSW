@@ -43,7 +43,7 @@
 
                 <TextView
 
-                    android:id="@+id/edit"
+                    android:id="@+id/editButton"
                     android:layout_weight="0.6"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:layout_above="@+id/pay"
+        android:layout_above="@+id/payButton"
         android:background="#fff"
         android:gravity="center"
 
@@ -140,7 +140,7 @@
 
         <TextView
 
-            android:id="@+id/total2"
+            android:id="@+id/amount"
             android:layout_weight="0.6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -160,7 +160,7 @@
 
 
     <TextView
-        android:id="@+id/pay"
+        android:id="@+id/payButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#51a3df"

@@ -2,7 +2,9 @@ package com.example.applicationingsw;
 
 import android.content.Intent;
 
-//TODO a chi farla implementare?
+/**
+ * Interface used as a strategy for the payment, that could be done through different methods.
+ */
 public interface PaymentMethod {
-    public Intent pay(float amount);
+    public void pay(float amount);
 }

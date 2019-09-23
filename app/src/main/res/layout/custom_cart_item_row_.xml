@@ -50,7 +50,7 @@
                 android:textSize="12dp" />
 
             <TextView
-                android:id="@+id/itemQuantity"
+                android:id="@+id/itemquantity"
                 android:textSize="14dp"
                 android:textColor="@color/black"
                 android:layout_width="match_parent"

@@ -54,12 +54,12 @@
 
             <EditText
 
-                android:id="@+id/name2"
+                android:id="@+id/firstNameTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#333333"
                 android:background="#00000000"
-                android:maxLines="1"
+                android:inputType="textMultiLine"
                />
 
                 <View
@@ -103,12 +103,54 @@
 
                     <EditText
 
-                        android:id="@+id/secondname2"
+                        android:id="@+id/secondNameTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="#333333"
                         android:background="#00000000"
-                        android:maxLines="1"
+                        android:inputType="textMultiLine"
+                        />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#dad8d8" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <!--*******EMAIL*******-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="16dp"
+
+                >
+
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="EMAIL"
+                    android:textColor="@color/black"
+                    android:textSize="12dp" />
+
+                <LinearLayout
+                    android:layout_weight="0.6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/emailTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#333333"
+                        android:background="#00000000"
+                        android:inputType="textMultiLine"
                         />
 
                     <View
@@ -151,7 +193,7 @@
 
                     <EditText
 
-                        android:id="@+id/phoneno2"
+                        android:id="@+id/phoneNumberTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="#333333"
@@ -201,12 +243,12 @@
 
                     <EditText
 
-                        android:id="@+id/address2"
+                        android:id="@+id/addressTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="#333333"
                         android:background="#00000000"
-                        android:maxLines="1"
+                        android:inputType="textMultiLine"
                       />
 
                     <View
@@ -219,53 +261,6 @@
 
 
             <!--******zip********-->
-
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:padding="16dp"
-
-                >
-
-
-                    <TextView
-                        android:layout_weight="1"
-                        android:id="@+id/zip1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="ZIP CODE"
-                        android:textSize="12dp"
-                        android:textColor="@color/black" />
-
-                <LinearLayout
-                    android:layout_weight="0.6"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <EditText
-
-                        android:id="@+id/zip2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="#333333"
-                        android:background="#00000000"
-                        android:maxLines="1"
-                        android:inputType="number"
-                        android:maxLength="7"
-                        />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#dad8d8" />
-
-                </LinearLayout>
-            </LinearLayout>
-
 
 
             <!--******CITY********-->
@@ -326,7 +321,7 @@
 
 
     <TextView
-        android:id="@+id/order"
+        android:id="@+id/continueToOrderButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#51a3df"

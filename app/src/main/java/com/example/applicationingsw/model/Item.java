@@ -72,7 +72,7 @@ public class Item implements Parcelable {
         return manufacturer;
     }
     public String getPriceWithConcurrency() { return price;   }
-    public float getPriceWithoutConcurrency(){return Float.valueOf(price.replaceAll(Resources.getSystem().getString(R.string.concurrency),""));}
+    public float getPriceWithoutConcurrency(){return Float.valueOf(price.replaceAll(App.getAppContext().getString(R.string.concurrency),""));}
     public String getDescription() {
         return description;
     }

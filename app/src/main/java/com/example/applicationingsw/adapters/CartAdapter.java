@@ -66,7 +66,7 @@ public class CartAdapter extends BaseAdapter {
             viewHolder = new ViewHolder(convertView);
             viewHolder.image = (ImageView)convertView.findViewById(R.id.itemImageCheckout);
             viewHolder.title = (TextView)convertView.findViewById(R.id.title);
-            viewHolder.quantity = (TextView)convertView.findViewById(R.id.itemQuantity);
+            viewHolder.quantity = (TextView)convertView.findViewById(R.id.itemquantity);
             viewHolder.price = (TextView)convertView.findViewById(R.id.itemPrice);
             convertView.setTag(viewHolder);
 
@@ -80,8 +80,8 @@ public class CartAdapter extends BaseAdapter {
         Picasso.with(context).load(itemInCart.first.getUrl()).resize(217,217).into(viewHolder.image);
         viewHolder.title.setText(itemInCart.first.getName());
         float totalPrice = itemInCart.first.getPriceWithoutConcurrency() * itemInCart.second;
-        viewHolder.price.setText(totalPrice+ App.getAppContext().getString(R.string.concurrency));
-        viewHolder.quantity.setText(itemInCart.second);
+        viewHolder.price.setText(totalPrice+ App.getAppContext().getResources().getString(R.string.concurrency));
+        viewHolder.quantity.setText(itemInCart.second.toString());
 
 
         return convertView;
