@@ -78,6 +78,14 @@
             android:minHeight="18dp"
             android:spinnerMode="dropdown" />
 
+        <EditText
+            android:id="@+id/birthdayInput"
+            android:clickable="true"
+            android:inputType="date"
+            android:hint="Birthday"
+            android:focusable="false"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent" />
 
         <!-- Password Label -->
             <EditText android:id="@+id/input_password"

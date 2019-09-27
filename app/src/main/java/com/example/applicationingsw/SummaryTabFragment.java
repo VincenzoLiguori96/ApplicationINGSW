@@ -64,7 +64,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
             @Override
             public void onClick(View view) {
                 String amountWithoutConcurrency = amount.getText().toString().replaceAll(App.getAppContext().getString(R.string.concurrency),"");
-                pay(Float.valueOf(amountWithoutConcurrency.toString()));
+                Cart.getInstance().pay(SummaryTabFragment.this);
             }
         });
         editShippingDetailsButton = summaryView.findViewById(R.id.editButton);

@@ -2,18 +2,27 @@ package com.example.applicationingsw;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.icu.text.DecimalFormat;
+import android.icu.text.NumberFormat;
+import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
+import android.icu.util.DateInterval;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -25,7 +34,12 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDel
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
 import com.amazonaws.regions.Regions;
+import com.example.applicationingsw.model.CognitoUserPoolShared;
 
+import java.util.Date;
+import java.util.Locale;
+
+@RequiresApi(api = Build.VERSION_CODES.N)
 public class SignupActivity extends Activity {
     private static final String TAG = "SignupActivity";
 
@@ -34,10 +48,13 @@ public class SignupActivity extends Activity {
     private EditText passwordText;
     private EditText surnameText;
     private EditText cityText;
+    private EditText birthdayText;
     private EditText addressText;
     private Button signupButton;
     private Spinner genderSpinner;
     private TextView loginLink;
+    final Calendar myCalendar = Calendar.getInstance();
+
     //Istanza di un user pool cognito
     private CognitoUserPool userPool ;
     private ProgressDialog progressDialog;
@@ -47,6 +64,7 @@ public class SignupActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
         emailText = findViewById(R.id.input_email);
+        birthdayText = findViewById(R.id.birthdayInput);
         passwordText = findViewById(R.id.input_password);
         nameText = findViewById(R.id.input_name);
         signupButton = findViewById(R.id.btn_signup);
@@ -55,7 +73,28 @@ public class SignupActivity extends Activity {
         surnameText = findViewById(R.id.input_surname);
         cityText = findViewById(R.id.input_city);
         addressText = findViewById(R.id.input_address);
-        userPool = new CognitoUserPool(getApplicationContext(), "eu-west-1_KQhWEFGrY", "3kjf4fl4bmn540hfg7v105mvmb", null, Regions.EU_WEST_1);
+        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateBirthdayLabel();
+            }
+
+        };
+
+        birthdayText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatePickerDialog dateDialog = new DatePickerDialog(SignupActivity.this);
+                dateDialog.setOnDateSetListener(date);
+                dateDialog.show();
+            }
+        });
+        userPool = CognitoUserPoolShared.getInstance().getUserPool();
         final String[] genders = getResources().getStringArray(R.array.gender_array);
         // Initializing an ArrayAdapter
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
@@ -155,14 +194,15 @@ public class SignupActivity extends Activity {
         String city = cityText.getText().toString();
         String address = addressText.getText().toString();
         String gender = "";
+        String birthday = birthdayText.getText().toString();
         if ( !genderSpinner.getSelectedItem().toString().equals("Gender")){
             gender = genderSpinner.getSelectedItem().toString();
         }
-        signUpWithCognito(name,email,password,surname,city,address,gender);
+        signUpWithCognito(name,email,password,surname,city,address,gender,birthday);
 
     }
 
-    public void signUpWithCognito(String name, final String email, final String password, String surname, String city, String address, String gender){
+    public void signUpWithCognito(String name, final String email, final String password, String surname, String city, String address, String gender,String birthday){
         // Create a CognitoUserAttributes object and add user attributes
         final CognitoUserAttributes userAttributes = new CognitoUserAttributes();
 // Add the user attributes. Attributes are added as key-value pairs
@@ -172,6 +212,7 @@ public class SignupActivity extends Activity {
         userAttributes.addAttribute("locale", city);
         userAttributes.addAttribute("address", address);
         userAttributes.addAttribute("gender", gender);
+        userAttributes.addAttribute("birthdate",birthday);
         SignUpHandler signupCallback = new SignUpHandler() {
             @Override
             public void onSuccess(final CognitoUser cognitoUser, boolean userConfirmed, CognitoUserCodeDeliveryDetails cognitoUserCodeDeliveryDetails) {
@@ -191,7 +232,7 @@ public class SignupActivity extends Activity {
                                     onSignupSuccess(email,password);
 
                                 }
-                            }, 3000);
+                            }, 2000);
                 }
                 else {
                     onSignupSuccess(email, password,true);
@@ -206,6 +247,14 @@ public class SignupActivity extends Activity {
             }
         };
         userPool.signUpInBackground(email,password, userAttributes, null,signupCallback);
+    }
+
+    public void updateBirthdayLabel(){
+        NumberFormat formatter = new DecimalFormat("00");
+        String month = formatter.format((myCalendar.get(Calendar.MONTH)+1));
+        String day = formatter.format(myCalendar.get(Calendar.DAY_OF_MONTH));
+        String birthdate = myCalendar.get(Calendar.YEAR) + "-" + month + "-" + day;
+        birthdayText.setText(birthdate);
     }
 
 

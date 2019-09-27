@@ -9,7 +9,7 @@ public class CognitoUserPoolShared {
     private CognitoUserPool userPool ;
 
     private CognitoUserPoolShared() {
-        userPool = new CognitoUserPool(App.getAppContext(), "eu-west-1_KQhWEFGrY", "3kjf4fl4bmn540hfg7v105mvmb", null, Regions.EU_WEST_1);
+        userPool = new CognitoUserPool(App.getAppContext(), "eu-west-1_qIQQC2GDj", "64j4muvurmai95vgvjjo78lhfk", null, Regions.EU_WEST_1);
     }
 
     public static CognitoUserPoolShared getInstance() {

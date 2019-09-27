@@ -134,9 +134,6 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
             case R.id.nav_cart:
                 CartAccessService.goToCart(getApplicationContext(),this);
                 return true;
-            case R.id.nav_categories:
-                //TODO vai alla ricerca per categorie
-                return true;
             case R.id.nav_profile:
                 //TODO vai al profilo
                 return true;

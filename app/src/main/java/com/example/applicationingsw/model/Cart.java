@@ -77,7 +77,6 @@ public class Cart {
         }
     }
     public void pay(PaymentMethod method) {
-
         float totalCost = calculateTotalPrice();
         method.pay(totalCost);
     }

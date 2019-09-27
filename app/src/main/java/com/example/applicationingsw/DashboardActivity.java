@@ -263,9 +263,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             case R.id.nav_cart:
                 goToCart();
                 return true;
-            case R.id.nav_categories:
-                //TODO vai alla ricerca per categorie
-                return true;
             case R.id.nav_profile:
                 //TODO vai al profilo
                 return true;
