@@ -15,12 +15,10 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
@@ -36,7 +34,6 @@ import com.android.volley.toolbox.Volley;
 import com.example.applicationingsw.Services.CartAccessService;
 import com.example.applicationingsw.adapters.ItemsAdapter;
 import com.example.applicationingsw.helpers.Space;
-import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.Item;
 
 import org.json.JSONArray;
@@ -63,6 +60,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_dashboard);
         leftSideMenu =findViewById( R.id.drawer_layout);
         filteredSearchImageView = findViewById(R.id.filteredSearch);
@@ -314,7 +312,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     @Override
     public void onItemSelected(Item item) {
-        //TODO vai alla schermata dettaglio
         Intent intent = new Intent(getApplicationContext(), ItemDetailActivity.class);
         intent.putExtra("CurrentItem", item);
         startActivity(intent);

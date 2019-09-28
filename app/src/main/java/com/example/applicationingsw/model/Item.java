@@ -4,7 +4,6 @@ package com.example.applicationingsw.model;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.example.applicationingsw.App;
 import com.example.applicationingsw.R;
@@ -26,7 +25,6 @@ public class Item implements Parcelable {
     private String url;
     private boolean isLoading = false;
     private boolean isNew = true;
-
 
     protected Item(Parcel in) {
         if (in.readByte() == 0) {

@@ -31,7 +31,6 @@ import com.paypal.android.sdk.payments.PaymentConfirmation;
 import org.json.JSONException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 public class SummaryTabFragment extends Fragment implements PaymentMethod {
 
@@ -47,7 +46,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     private int[] IMAGE = {R.drawable.cio_card_io_logo, R.drawable.ic_list, R.drawable.ic_close_tag,
             R.drawable.ic_add_to_cart, R.drawable.ic_cart};
     private CartAdapter baseAdapter;
-
+    private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
     public SummaryTabFragment(){};
 
     @Override
@@ -202,4 +201,11 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         CognitoUser curr = CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser();
         CognitoUserPoolShared.getInstance().getUserPool().getUser(curr.getUserId()).getDetailsInBackground(handler);
     }
+
+
+    public void postOrderOnDB(String endpoint){
+
+    }
+
+
 }
