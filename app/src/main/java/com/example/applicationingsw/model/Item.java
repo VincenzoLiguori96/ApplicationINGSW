@@ -78,7 +78,7 @@ public class Item implements Parcelable {
             return Float.valueOf(price.replaceAll(Currency.getInstance(Locale.getDefault()).getSymbol(),""));
         }
         else{
-            amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ "€");
+            return Float.valueOf(price.replaceAll("€",""));
         }
     }
     public String getDescription() {
@@ -95,7 +95,14 @@ public class Item implements Parcelable {
     }
     public void setName(String name) { this.name = (name); }
     public void setManufacturer(String manufacturer) {  this.manufacturer = (manufacturer); }
-    public void setPrice(float price) {    this.price = price + Resources.getSystem().getString(R.string.concurrency); }
+    public void setPrice(float price) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            this.price = price + Currency.getInstance(Locale.getDefault()).getSymbol();
+        }
+        else{
+            this.price = price + "€";
+        }
+    }
     public void setDescription(String description) {    this.description = (description);    }
     public void setQuantity(int quantity) {
         this.quantity = (quantity);
@@ -116,7 +123,12 @@ public class Item implements Parcelable {
     public Item(int anId, String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory,List<String>tagsList) {
         id = (anId);
         name =  (aName);
-        price = aPrice + App.getAppContext().getResources().getString(R.string.concurrency);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            this.price = aPrice + Currency.getInstance(Locale.getDefault()).getSymbol();
+        }
+        else{
+            this.price = aPrice + "€";
+        }
         manufacturer =  (aManufacturer);
         description =  (aDescription);
         quantity = (aQuantity);
@@ -127,7 +139,12 @@ public class Item implements Parcelable {
 
     public Item( String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory) {
         name =  (aName);
-        price = aPrice + Resources.getSystem().getString(R.string.concurrency);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            this.price = aPrice + Currency.getInstance(Locale.getDefault()).getSymbol();
+        }
+        else{
+            this.price = aPrice + "€";
+        }
         manufacturer =  (aManufacturer);
         description =  (aDescription);
         quantity = (aQuantity);

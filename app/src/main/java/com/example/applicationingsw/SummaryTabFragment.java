@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.icu.util.Currency;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class SummaryTabFragment extends Fragment implements PaymentMethod {
@@ -241,6 +243,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                     try {
                         JSONObject responseBody = new JSONObject(response);
                         boolean result = responseBody.getBoolean("success");
+                        Log.e("RISULTATO POST ORDER",responseBody.toString());
                         if(!result){
                             postOrderOnDB(endpoint);
                         }
@@ -285,6 +288,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     public void sendInvoice(String endpoint){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
         JSONObject jsonBody = getInvoiceAsJson();
+        Log.e("BODY POST INVOICE",jsonBody.toString());
         final String requestBody = jsonBody.toString();
         final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
             @Override
@@ -292,6 +296,8 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                 try {
                     JSONObject responseBody = new JSONObject(response);
                     boolean result = responseBody.getBoolean("success");
+                    Log.e("RISULTATO POST INVOICE",responseBody.toString());
+
                     if(!result){
                         sendInvoice(invoiceEndpoint);
                     }
@@ -337,7 +343,15 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         JSONObject invoiceJson = new JSONObject();
         try {
             JSONObject header = new JSONObject();
-            header.put("invoiceDate", Calendar.getInstance().getTime());
+            Date cDate = new Date();
+            String formattedDate;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
+                header.put("invoiceDate", formattedDate);
+            }
+            else {
+                header.put("invoiceDate", Calendar.getInstance().getTime());
+            }
             header.put("invoiceNumber",Calendar.getInstance().getTimeInMillis());
             JSONObject personalData = new JSONObject();
             personalData.put("first",currentCustomer.getName());
@@ -347,8 +361,9 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
             JSONArray arrayOfItems = new JSONArray();
             JSONObject singleItem = new JSONObject();
             for(Pair<Item,Integer>itemInCart : Cart.getInstance().getItemsInCart()){
+                Log.e("ARTICOLI ENTRO","VOLTE");
                 singleItem.put("productId", itemInCart.first.getId());
-                singleItem.put("description", itemInCart.first.getDescription());
+                singleItem.put("description", itemInCart.first.getName() + ", " + itemInCart.first.getDescription());
                 singleItem.put("quantity", itemInCart.second);
                 singleItem.put("unitPrice", itemInCart.first.getPriceWithoutConcurrency());
                 arrayOfItems.put(singleItem);
