@@ -27,6 +27,8 @@ public class Cart {
     private static Cart instance;
     private int cartID = -1;
     private boolean isValid = false;
+    private static String cartIDEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart";
+
 
     /**
      * Items in cart is a pair of values of type (Item,Quantity) where Item is an object of item type and Quantity is the quantity of the related item in the cart.
@@ -37,8 +39,7 @@ public class Cart {
      * The private constructor for the CartSingleton class
      */
     private Cart() {
-        String endpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart";
-        getCartIDFromAPI(endpoint);
+        getCartIDFromAPI(cartIDEndpoint);
     }
 
     public static synchronized Cart getInstance() {
@@ -47,7 +48,7 @@ public class Cart {
         }
         else{
             if(instance.getCartID() == -1){
-                instance.getCartIDFromAPI("https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart");
+                instance.getCartIDFromAPI(cartIDEndpoint);
             }
         }
         return instance;
@@ -131,7 +132,7 @@ public class Cart {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     setCartID(-1);
-                    getCartIDFromAPI("https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart");
+                    getCartIDFromAPI(cartIDEndpoint);
                 }
             }) {
                 @Override
@@ -160,8 +161,12 @@ public class Cart {
             requestQueue.start();
 
         } catch (JSONException e) {
-            getCartIDFromAPI("https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart");
+            getCartIDFromAPI(cartIDEndpoint);
         }
+    }
+
+    public void clearCart(){
+        itemsInCart.clear();
     }
 
     public JSONObject getCartAsJson(){
@@ -172,11 +177,12 @@ public class Cart {
             for(Pair<Item,Integer>itemInCart : itemsInCart){
                 singleItem.put("id", itemInCart.first.getId());
                 singleItem.put("quantity", itemInCart.second);
-                singleItem = new JSONObject();
                 arrayOfItems.put(singleItem);
+                singleItem = new JSONObject();
             }
             jsonBody.put("items", arrayOfItems);
             if(getCartID() != -1){
+                getCartIDFromAPI(cartIDEndpoint);
                 jsonBody.put("cart", getCartID());
             }
             else{

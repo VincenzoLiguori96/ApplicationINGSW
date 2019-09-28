@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.util.Currency;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -17,6 +19,15 @@ import android.widget.TextView;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.applicationingsw.Services.PaypalConfigurationService;
 import com.example.applicationingsw.adapters.CartAdapter;
 import com.example.applicationingsw.model.Cart;
@@ -28,9 +39,14 @@ import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentActivity;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class SummaryTabFragment extends Fragment implements PaymentMethod {
 
@@ -47,6 +63,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
             R.drawable.ic_add_to_cart, R.drawable.ic_cart};
     private CartAdapter baseAdapter;
     private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
+    private String invoiceEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/invoice";
     public SummaryTabFragment(){};
 
     @Override
@@ -57,12 +74,16 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         buyerName = summaryView.findViewById(R.id.buyerName);
         amount = summaryView.findViewById(R.id.amount);
         getUserData();
-        amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ App.getAppContext().getString(R.string.concurrency));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ Currency.getInstance(Locale.getDefault()).getSymbol());
+        }
+        else{
+            amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ "€");
+        }
         payButton = summaryView.findViewById(R.id.payButton);
         payButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String amountWithoutConcurrency = amount.getText().toString().replaceAll(App.getAppContext().getString(R.string.concurrency),"");
                 Cart.getInstance().pay(SummaryTabFragment.this);
             }
         });
@@ -80,8 +101,6 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         };
 
         listview.setAdapter(baseAdapter);
-
-
         return  summaryView;
 
     }
@@ -92,13 +111,15 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
      */
     @Override
     public void pay(float amount) {
+        Log.e("PAGAMENTO","entro e procedo" + amount);
         if(amount>0){
             String description = "" ;
             for(Pair<Item,Integer> itemInCart : Cart.getInstance().getItemsInCart()){
                 description += itemInCart.first.getName() + "n." + itemInCart.second +",";
             }
             description = description.substring(0,description.lastIndexOf(","));
-            PayPalPayment payment = new PayPalPayment(new BigDecimal(Cart.getInstance().calculateTotalPrice()), App.getAppContext().getString(R.string.concurrency), description,
+            String concurrencyCode = getPaypalConcurrencyCode();
+            PayPalPayment payment = new PayPalPayment(new BigDecimal(Cart.getInstance().calculateTotalPrice()),concurrencyCode , description,
                     PayPalPayment.PAYMENT_INTENT_SALE);
 
             Intent intent = new Intent(App.getAppContext(), PaymentActivity.class);
@@ -124,26 +145,32 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         }
     }
 
+    public String getPaypalConcurrencyCode(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Currency.getInstance(Locale.getDefault()).getCurrencyCode();
+        }
+        else{
+            return "EUR";
+        }
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //TODO aggiornare il db con l'ordine + mandare email riepilogo.
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             PaymentConfirmation confirm = data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
-                try {
-                    Log.i("paymentExample", confirm.toJSONObject().toString(4));
-
-                } catch (JSONException e) {
-                    Log.e("paymentExample", "an extremely unlikely failure occurred: ", e);
-                }
+                postOrderOnDB(postOrderEndpoint);
+                Cart.getInstance().clearCart();
+                sendInvoice(invoiceEndpoint);
             }
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
+            //TODO: l'utente ha cancellato il pagamento, mostra l'avviso
             Log.i("paymentExample", "The user canceled.");
         }
         else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
-            Log.i("paymentExample", "An invalid Payment or PayPalConfiguration was submitted. Please see the docs.");
+            //TODO: Pagamento non valido, mostra l'avviso.
         }
 
     }
@@ -187,6 +214,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                 ShippingTabFragment.SendCustomer customerToPaymentFragment = (ShippingTabFragment.SendCustomer) getActivity();
                 displayShippingInfo(customer);
                 customerToPaymentFragment.send(customer,1);
+                getInvoiceAsJson();
             }
 
             @Override
@@ -203,8 +231,147 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     }
 
 
-    public void postOrderOnDB(String endpoint){
+    public void postOrderOnDB(final String endpoint){
+        final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
+            JSONObject jsonBody = Cart.getInstance().getCartAsJson();
+            final String requestBody = jsonBody.toString();
+            final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONObject responseBody = new JSONObject(response);
+                        boolean result = responseBody.getBoolean("success");
+                        if(!result){
+                            postOrderOnDB(endpoint);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    postOrderOnDB(endpoint);
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        Log.i("BODY", requestBody);
+                        return requestBody == null ? null : requestBody.getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                        return null;
+                    }
+                }
+
+
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    return super.parseNetworkResponse(response);
+                }
+            };
+            requestQueue.add(stringRequest);
+            requestQueue.start();
+    }
+
+
+    public void sendInvoice(String endpoint){
+        final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
+        JSONObject jsonBody = getInvoiceAsJson();
+        final String requestBody = jsonBody.toString();
+        final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject responseBody = new JSONObject(response);
+                    boolean result = responseBody.getBoolean("success");
+                    if(!result){
+                        sendInvoice(invoiceEndpoint);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                sendInvoice(invoiceEndpoint);
+            }
+        }) {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    Log.i("BODY", requestBody);
+                    return requestBody == null ? null : requestBody.getBytes("utf-8");
+                } catch (UnsupportedEncodingException uee) {
+                    VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                    return null;
+                }
+            }
+
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                return super.parseNetworkResponse(response);
+            }
+        };
+        requestQueue.add(stringRequest);
+        requestQueue.start();
+    }
+
+
+    public JSONObject getInvoiceAsJson(){
+        JSONObject invoiceJson = new JSONObject();
+        try {
+            JSONObject header = new JSONObject();
+            header.put("invoiceDate", Calendar.getInstance().getTime());
+            header.put("invoiceNumber",Calendar.getInstance().getTimeInMillis());
+            JSONObject personalData = new JSONObject();
+            personalData.put("first",currentCustomer.getName());
+            personalData.put("last",currentCustomer.getSurname());
+            personalData.put("address",currentCustomer.getAddress());
+            personalData.put("city",currentCustomer.getCity());
+            JSONArray arrayOfItems = new JSONArray();
+            JSONObject singleItem = new JSONObject();
+            for(Pair<Item,Integer>itemInCart : Cart.getInstance().getItemsInCart()){
+                singleItem.put("productId", itemInCart.first.getId());
+                singleItem.put("description", itemInCart.first.getDescription());
+                singleItem.put("quantity", itemInCart.second);
+                singleItem.put("unitPrice", itemInCart.first.getPriceWithoutConcurrency());
+                arrayOfItems.put(singleItem);
+                singleItem = new JSONObject();
+            }
+            JSONObject invoiceBody = new JSONObject();
+            invoiceBody.put("header",header);
+            invoiceBody.put("billTo",personalData);
+            invoiceBody.put("notes","");
+            invoiceBody.put("rows",arrayOfItems);
+            invoiceJson.put("invoice", invoiceBody);
+            invoiceJson.put("email",CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().getUserId());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                invoiceJson.put("concurrency",Currency.getInstance(Locale.getDefault()).getSymbol());
+            }
+            else{
+                invoiceJson.put("concurrency","€");
+            }
+            Log.e("Il json invoice è:" , invoiceJson.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return invoiceJson;
     }
 
 

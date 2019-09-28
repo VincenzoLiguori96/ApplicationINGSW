@@ -7,7 +7,7 @@
         <item>Rather not say</item>
         <item>A gender not listed here</item>
     </string-array>
-    <string name="concurrency">€</string>
+    <string name="currency">€</string>
     <string name="action_settings">Settings</string>
     <string name="loading">Please wait Loading…</string>
     <string name="new_Item">New</string>

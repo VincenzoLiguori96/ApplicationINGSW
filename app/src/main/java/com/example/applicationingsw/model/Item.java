@@ -2,6 +2,8 @@ package com.example.applicationingsw.model;
 
 
 import android.content.res.Resources;
+import android.icu.util.Currency;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,6 +12,7 @@ import com.example.applicationingsw.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Item implements Parcelable {
@@ -70,7 +73,14 @@ public class Item implements Parcelable {
         return manufacturer;
     }
     public String getPriceWithConcurrency() { return price;   }
-    public float getPriceWithoutConcurrency(){return Float.valueOf(price.replaceAll(App.getAppContext().getString(R.string.concurrency),""));}
+    public float getPriceWithoutConcurrency(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Float.valueOf(price.replaceAll(Currency.getInstance(Locale.getDefault()).getSymbol(),""));
+        }
+        else{
+            amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ "€");
+        }
+    }
     public String getDescription() {
         return description;
     }
