@@ -2,6 +2,7 @@ package com.example.applicationingsw;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.text.SimpleDateFormat;
@@ -65,6 +66,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     private int[] IMAGE = {R.drawable.cio_card_io_logo, R.drawable.ic_list, R.drawable.ic_close_tag,
             R.drawable.ic_add_to_cart, R.drawable.ic_cart};
     private CartAdapter baseAdapter;
+    ProgressDialog loadingDialog;
     private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
     private String invoiceEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/invoice";
     private String cancelOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/recoverorder";
@@ -88,6 +90,8 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         payButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                loadingDialog = ProgressDialog.show(getActivity(), "",
+                        "I'm processing the payment. Please wait...", true);
                 Cart.getInstance().pay(SummaryTabFragment.this);
             }
         });
@@ -120,10 +124,11 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     }
 
     public void proceedWithPayment(float amount){
+        loadingDialog.dismiss();
         if(amount>0){
             String description = "" ;
             for(Pair<Item,Integer> itemInCart : Cart.getInstance().getItemsInCart()){
-                description += itemInCart.first.getName() + " n." + itemInCart.second;
+                description += itemInCart.first.getName() + " n." + itemInCart.second + ",";
             }
             description = description.substring(0,description.lastIndexOf(","));
             String concurrencyCode = getPaypalConcurrencyCode();
@@ -139,6 +144,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
             startActivityForResult(intent, 0);
         }
         else {
+            loadingDialog.dismiss();
             new AlertDialog.Builder(getContext())
                     .setTitle("No items in cart.")
                     .setMessage("Are you sure you added something?")
@@ -264,6 +270,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                             JSONObject errorReport = responseBody.getJSONObject("errorReport");
                             int errorCode = errorReport.getInt("errorCode");
                             if(errorCode == 23514){
+                                loadingDialog.dismiss();
                                 new AlertDialog.Builder(getContext())
                                         .setTitle("Items not available")
                                         .setMessage("We're sorry but one or more items are not available anymore. Try to reduce your quantity or wait until they will be newly available.")
@@ -282,18 +289,19 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                                 }
                                 else{
                                     retriesCount = 0;
+                                    loadingDialog.dismiss();
                                     new AlertDialog.Builder(getContext())
                                             .setTitle("Purchase not available")
                                             .setMessage("We're sorry but something went wrong with your purchase. Please retry.")
                                             .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     cancelOrderOnDB(cancelOrderEndpoint);
+                                                    Cart.getInstance().clearCart();
+                                                    SummaryTabFragment.this.getActivity().finish();
                                                 }
                                             })
                                             .setIcon(android.R.drawable.ic_dialog_alert)
                                             .show();
-                                    Cart.getInstance().clearCart();
-                                    SummaryTabFragment.this.getActivity().finish();
                                 }
                             }
                         }
@@ -314,6 +322,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                     }
                     else{
                         retriesCount = 0;
+                        loadingDialog.dismiss();
                         new AlertDialog.Builder(getContext())
                                 .setTitle("Purchase not available")
                                 .setMessage("We're sorry but something went wrong with your purchase. Please retry.")

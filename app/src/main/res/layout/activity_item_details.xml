@@ -105,25 +105,38 @@
                                 android:background="#fff"
                                 android:gravity="center"
                                 android:orientation="horizontal"
-                                android:padding="16dp"
                                 android:visibility="visible">
                                 <ImageView
                                     android:layout_width="60dp"
                                     android:layout_height="60dp"
                                     android:id="@+id/addToCartRapidButton"
                                     android:src="@drawable/ic_add_to_cart"
-                                    android:layout_marginLeft="18dp"
+                                    android:layout_weight="1"
                                     android:layout_gravity="left">
                                 </ImageView>
                                 <TextView
-                                    android:id="@+id/priceTextView"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:id="@+id/availabilityLabel"
+                                    android:layout_gravity="left"
+                                    android:layout_weight="1"
+                                    android:textAlignment="center"
+                                    android:layout_marginLeft="10dp"
+                                    android:textStyle="italic|bold"
+                                    android:textSize="26dp"
+                                    android:text="Available"
+                                    android:textColor="@color/green">
+                                </TextView>
+                                <TextView
+                                    android:id="@+id/priceTextView"
+                                    android:layout_width="60dp"
+                                    android:layout_height="60dp"
                                     android:layout_weight="1"
                                     android:gravity="right"
                                     android:text="$ 250"
+                                    android:layout_marginRight="8dp"
                                     android:textColor="@color/black"
-                                    android:textSize="30dp" />
+                                    android:textSize="26dp" />
                             </LinearLayout>
 
 

@@ -23,7 +23,7 @@
                 android:scaleType="fitCenter" />
 
             <TextView
-                android:id="@+id/textViewNew"
+                android:id="@+id/textViewAvailability"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/pink"

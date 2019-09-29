@@ -1,6 +1,7 @@
 package com.example.applicationingsw.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +11,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.applicationingsw.App;
 import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.Item;
 import com.squareup.picasso.Picasso;
@@ -92,11 +95,15 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
                 Picasso.with(mContext).load(currentItem.getUrl()).into(ItemHolder.imageViewItemThumb);
                 ItemHolder.textViewItemName.setText(currentItem.getName());
                 ItemHolder.textViewItemPrice.setText(currentItem.getPriceWithConcurrency());
-                if (currentItem.isNew() && !currentItem.isLoading())
-                    ItemHolder.textViewNew.setVisibility(View.VISIBLE);
-                else
-                    ItemHolder.textViewNew.setVisibility(View.GONE);
-
+                ItemHolder.textViewAvailability.setVisibility(View.VISIBLE);
+                if (currentItem.getQuantity() >= 1) {
+                    ItemHolder.textViewAvailability.setBackgroundColor(Color.parseColor("#16cc16"));
+                    ItemHolder.textViewAvailability.setText("Available");
+                }
+                else{
+                    ItemHolder.textViewAvailability.setBackgroundColor(Color.parseColor("#ff0000"));
+                    ItemHolder.textViewAvailability.setText("Unavailable");
+                }
                 ItemHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -169,7 +176,7 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
     //Holds view of Item with information
     private class ItemHolder extends RecyclerView.ViewHolder {
         ImageView imageViewItemThumb;
-        TextView textViewItemName, textViewItemPrice, textViewNew;
+        TextView textViewItemName, textViewItemPrice, textViewAvailability;
 
 
         public ItemHolder(View itemView) {
@@ -177,7 +184,7 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
             imageViewItemThumb = itemView.findViewById(R.id.imageViewItemThumb);
             textViewItemName = itemView.findViewById(R.id.textViewItemName);
             textViewItemPrice = itemView.findViewById(R.id.textViewItemPrice);
-            textViewNew = itemView.findViewById(R.id.textViewNew);
+            textViewAvailability = itemView.findViewById(R.id.textViewAvailability);
 
         }
     }

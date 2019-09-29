@@ -34,6 +34,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
     private TextView descriptionTextView;
     private TextView manufacturerTextView;
     private TextView quantityTextView;
+    private TextView availabilityTextView;
     private LinearLayout addToCart ;
     private Item currentItem;
 
@@ -68,6 +69,14 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
                 addToCart(currentItem);
             }
         });
+        availabilityTextView = findViewById(R.id.availabilityLabel);
+        if(currentItem.getQuantity()>=1){
+            availabilityTextView.setText("Available");
+        }
+        else{
+            availabilityTextView.setText("Unavailable");
+            availabilityTextView.setTextColor(getResources().getColor(R.color.red));
+        }
         productImage = findViewById(R.id.productimage);
         Picasso.with(this).load(currentItem.getUrl()).into(productImage);
         priceTextView = findViewById(R.id.priceTextView);
