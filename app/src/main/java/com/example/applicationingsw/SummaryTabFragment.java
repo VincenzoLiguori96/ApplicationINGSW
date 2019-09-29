@@ -60,12 +60,14 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     private TextView editShippingDetailsButton;
     private TextView amount;
     private TextView payButton;
+    private int retriesCount;
     private Customer currentCustomer;
     private int[] IMAGE = {R.drawable.cio_card_io_logo, R.drawable.ic_list, R.drawable.ic_close_tag,
             R.drawable.ic_add_to_cart, R.drawable.ic_cart};
     private CartAdapter baseAdapter;
     private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
     private String invoiceEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/invoice";
+    private String cancelOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/recoverorder";
     public SummaryTabFragment(){};
 
     @Override
@@ -108,16 +110,20 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     }
 
     /**
-     * Concrete PaymentMethod strategy implementation, takes to the Paypal sdk activities for payment.
+     * Concrete PaymentMethod strategy implementation, takes to the Paypal sdk activities for payment after the confirm of the availability of all the items.
      * @param amount the amount of the payment.
      */
     @Override
     public void pay(float amount) {
         Log.e("PAGAMENTO","entro e procedo" + amount);
+        postOrderOnDB(postOrderEndpoint,amount);
+    }
+
+    public void proceedWithPayment(float amount){
         if(amount>0){
             String description = "" ;
             for(Pair<Item,Integer> itemInCart : Cart.getInstance().getItemsInCart()){
-                description += itemInCart.first.getName() + "n." + itemInCart.second +",";
+                description += itemInCart.first.getName() + " n." + itemInCart.second;
             }
             description = description.substring(0,description.lastIndexOf(","));
             String concurrencyCode = getPaypalConcurrencyCode();
@@ -162,17 +168,26 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         if (resultCode == Activity.RESULT_OK) {
             PaymentConfirmation confirm = data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
-                postOrderOnDB(postOrderEndpoint);
-                Cart.getInstance().clearCart();
                 sendInvoice(invoiceEndpoint);
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Purchase done")
+                        .setMessage("The order is completed! Check your inbox for the invoice and continue shopping!")
+                        .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                SummaryTabFragment.this.getActivity().finish();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
             }
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
-            //TODO: l'utente ha cancellato il pagamento, mostra l'avviso
             Log.i("paymentExample", "The user canceled.");
+            cancelOrderOnDB(cancelOrderEndpoint);
         }
         else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
-            //TODO: Pagamento non valido, mostra l'avviso.
+            cancelOrderOnDB(cancelOrderEndpoint);
+
         }
 
     }
@@ -233,19 +248,57 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     }
 
 
-    public void postOrderOnDB(final String endpoint){
+    public void postOrderOnDB(final String endpoint, final float amount){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
             JSONObject jsonBody = Cart.getInstance().getCartAsJson();
             final String requestBody = jsonBody.toString();
+            Log.e("BODU ORDER:",requestBody);
             final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
                         JSONObject responseBody = new JSONObject(response);
-                        boolean result = responseBody.getBoolean("success");
+                        boolean isAuthorized = responseBody.getBoolean("success");
                         Log.e("RISULTATO POST ORDER",responseBody.toString());
-                        if(!result){
-                            postOrderOnDB(endpoint);
+                        if(!isAuthorized){
+                            JSONObject errorReport = responseBody.getJSONObject("errorReport");
+                            int errorCode = errorReport.getInt("errorCode");
+                            if(errorCode == 23514){
+                                new AlertDialog.Builder(getContext())
+                                        .setTitle("Items not available")
+                                        .setMessage("We're sorry but one or more items are not available anymore. Try to reduce your quantity or wait until they will be newly available.")
+                                        .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                cancelOrderOnDB(cancelOrderEndpoint);
+                                            }
+                                        })
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .show();
+                            }
+                            else{
+                                retriesCount++;
+                                if(retriesCount < 10){
+                                    postOrderOnDB(endpoint,amount);
+                                }
+                                else{
+                                    retriesCount = 0;
+                                    new AlertDialog.Builder(getContext())
+                                            .setTitle("Purchase not available")
+                                            .setMessage("We're sorry but something went wrong with your purchase. Please retry.")
+                                            .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    cancelOrderOnDB(cancelOrderEndpoint);
+                                                }
+                                            })
+                                            .setIcon(android.R.drawable.ic_dialog_alert)
+                                            .show();
+                                    Cart.getInstance().clearCart();
+                                    SummaryTabFragment.this.getActivity().finish();
+                                }
+                            }
+                        }
+                        else{
+                            proceedWithPayment(amount);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -255,7 +308,25 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    postOrderOnDB(endpoint);
+                    retriesCount++;
+                    if(retriesCount < 10){
+                        postOrderOnDB(endpoint,amount);
+                    }
+                    else{
+                        retriesCount = 0;
+                        new AlertDialog.Builder(getContext())
+                                .setTitle("Purchase not available")
+                                .setMessage("We're sorry but something went wrong with your purchase. Please retry.")
+                                .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        cancelOrderOnDB(cancelOrderEndpoint);
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
+                        Cart.getInstance().clearCart();
+                        SummaryTabFragment.this.getActivity().finish();
+                    }
                 }
             }) {
                 @Override
@@ -285,6 +356,59 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     }
 
 
+    public void cancelOrderOnDB(final String endpoint){
+        final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
+        JSONObject jsonBody = Cart.getInstance().getCartAsJson();
+        final String requestBody = jsonBody.toString();
+        Log.e("BODU ORDER:",requestBody);
+        final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject responseBody = new JSONObject(response);
+                    boolean result = responseBody.getBoolean("success");
+                    Log.e("RISULTATO POST ORDER",responseBody.toString());
+                    if(!result){
+                        cancelOrderOnDB(endpoint);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                cancelOrderOnDB(endpoint);
+            }
+        }) {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    Log.i("BODY", requestBody);
+                    return requestBody == null ? null : requestBody.getBytes("utf-8");
+                } catch (UnsupportedEncodingException uee) {
+                    VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                    return null;
+                }
+            }
+
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                return super.parseNetworkResponse(response);
+            }
+        };
+        requestQueue.add(stringRequest);
+        requestQueue.start();
+    }
+
+
     public void sendInvoice(String endpoint){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
         JSONObject jsonBody = getInvoiceAsJson();
@@ -297,10 +421,10 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                     JSONObject responseBody = new JSONObject(response);
                     boolean result = responseBody.getBoolean("success");
                     Log.e("RISULTATO POST INVOICE",responseBody.toString());
-
                     if(!result){
                         sendInvoice(invoiceEndpoint);
                     }
+                    Cart.getInstance().clearCart();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -309,6 +433,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.e("ERRORE POST INVOICE",error.getLocalizedMessage());
                 sendInvoice(invoiceEndpoint);
             }
         }) {
