@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.applicationingsw.Services.CartAccessService;
 import com.example.applicationingsw.model.Cart;
+import com.example.applicationingsw.model.CognitoUserPoolShared;
 import com.example.applicationingsw.model.Item;
 import com.squareup.picasso.Picasso;
 
@@ -144,11 +145,14 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
                 CartAccessService.goToCart(getApplicationContext(),this);
                 return true;
             case R.id.nav_profile:
-                //TODO vai al profilo
+                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.nav_logout:
-                //TODO esci e cancella i dati di aws
-                return true;
+                CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().signOut();
+                Intent turnToLoginPage = new Intent(this,LoginActivity.class);
+                turnToLoginPage.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                this.startActivity(turnToLoginPage);                return true;
 
         }
         return false;

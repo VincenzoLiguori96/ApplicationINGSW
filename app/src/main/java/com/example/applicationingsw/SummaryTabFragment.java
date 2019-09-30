@@ -227,24 +227,23 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         GetDetailsHandler handler = new GetDetailsHandler() {
             @Override
             public void onSuccess(final CognitoUserDetails list) {
-                // Successfully retrieved user details
                 String savedEmail = list.getAttributes().getAttributes().get("email");
                 String savedName = list.getAttributes().getAttributes().get("name");
                 String savedSurname = list.getAttributes().getAttributes().get("family_name");
                 String savedAddress = list.getAttributes().getAttributes().get("address");
                 String savedCity = list.getAttributes().getAttributes().get("locale");
-                Customer customer = new Customer(savedName,savedSurname,savedAddress,savedEmail,"",savedCity);
+                String birthdate = list.getAttributes().getAttributes().get("birthdate");
+                Customer customer = new Customer(savedName,savedSurname,savedAddress,savedEmail,"",savedCity,birthdate);
                 ShippingTabFragment.SendCustomer customerToPaymentFragment = (ShippingTabFragment.SendCustomer) getActivity();
                 displayShippingInfo(customer);
                 customerToPaymentFragment.send(customer,1);
-                getInvoiceAsJson();
             }
 
             @Override
             public void onFailure(final Exception exception) {
                 // Failed to retrieve the user details, probe exception for the cause
                 Log.e("Exc dettagli utente",exception.toString());
-                Customer customer = new Customer("","","","","","");
+                Customer customer = new Customer("","","","","","","");
                 ShippingTabFragment.SendCustomer customerToPaymentFragment = (ShippingTabFragment.SendCustomer) getActivity();
                 customerToPaymentFragment.send(customer,1);
             }

@@ -34,6 +34,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.applicationingsw.Services.CartAccessService;
 import com.example.applicationingsw.adapters.ItemsAdapter;
 import com.example.applicationingsw.helpers.Space;
+import com.example.applicationingsw.model.CognitoUserPoolShared;
 import com.example.applicationingsw.model.Item;
 
 import org.json.JSONArray;
@@ -262,10 +263,14 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 goToCart();
                 return true;
             case R.id.nav_profile:
-                //TODO vai al profilo
+                Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.nav_logout:
-                //TODO esci e cancella i dati di aws
+                CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().signOut();
+                Intent turnToLoginPage = new Intent(this,LoginActivity.class);
+                turnToLoginPage.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                this.startActivity(turnToLoginPage);
                 return true;
 
         }

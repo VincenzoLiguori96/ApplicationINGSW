@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
 public class LaunchActivity extends Activity {
@@ -17,18 +20,22 @@ public class LaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
         CognitoUserPool userPool = CognitoUserPoolShared.getInstance().getUserPool();
         CognitoUser savedUser = userPool.getCurrentUser();
-        if (savedUser.getUserId() == null ){
-            Log.i(TAG, "Nessun utente salvato, vado al login");
-            Intent myIntent = new Intent(LaunchActivity.this, LoginActivity.class);
-            LaunchActivity.this.startActivity(myIntent);
-            this.finish();
-        }
-        else{
-            Log.i(TAG, "Utente trovato,vado all'app");
-            Log.i(TAG,"Utente: " + savedUser.getUserId());
-            Intent myIntent = new Intent(LaunchActivity.this, DashboardActivity.class);
-            LaunchActivity.this.startActivity(myIntent);
-            this.finish();
-        }
+        savedUser.getDetailsInBackground(new GetDetailsHandler() {
+            @Override
+            public void onSuccess(CognitoUserDetails cognitoUserDetails) {
+                Log.e(TAG, " utente salvato, vado al login");
+                Intent myIntent = new Intent(LaunchActivity.this, DashboardActivity.class);
+                LaunchActivity.this.startActivity(myIntent);
+                LaunchActivity.this.finish();
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                Log.e(TAG, "Nessun utente salvato, vado al login" + exception.getLocalizedMessage());
+                Intent myIntent = new Intent(LaunchActivity.this, LoginActivity.class);
+                LaunchActivity.this.startActivity(myIntent);
+                LaunchActivity.this.finish();
+            }
+        });
     }
 }

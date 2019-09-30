@@ -79,7 +79,7 @@ public class ShippingTabFragment extends Fragment {
 
     public void continueButtonPressed(){
         if(validate()){
-            Customer customer = new Customer(name.getText().toString(),surname.getText().toString(),address.getText().toString(),email.getText().toString(),"",city.getText().toString());
+            Customer customer = new Customer(name.getText().toString(),surname.getText().toString(),address.getText().toString(),email.getText().toString(),"",city.getText().toString(),"");
             try {
                 SendCustomer customerToPaymentFragment = (SendCustomer) getActivity();
                 customerToPaymentFragment.send(customer,0);

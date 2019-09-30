@@ -1,5 +1,8 @@
 package com.example.applicationingsw.model;
 
+
+import android.util.Log;
+
 public class
 Customer {
     private String name;
@@ -9,9 +12,10 @@ Customer {
     private String email;
     private String gender;
     private String city;
+    private String birthdate;
 
     public Customer(int id, String name, String surname, String address, String email, String gender,
-                    String city) {
+                    String city,String birthdate) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -19,16 +23,19 @@ Customer {
         this.email = email;
         this.gender = gender;
         this.city = city;
+        this.birthdate = birthdate;
+        Log.e("CUSTOMER DATA",birthdate);
     }
 
     public Customer( String name, String surname, String address, String email, String gender,
-                    String city) {
+                    String city,String birthdate) {
         this.name = name;
         this.surname = surname;
         this.address = address;
         this.email = email;
         this.gender = gender;
         this.city = city;
+        this.birthdate = birthdate;
     }
 
 
@@ -79,5 +86,13 @@ Customer {
     @Override
     public String toString(){
         return getId()+getName()+getSurname();
+    }
+
+    public String getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(String birthdate) {
+        this.birthdate = birthdate;
     }
 }
