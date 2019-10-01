@@ -1,13 +1,19 @@
 package com.example.applicationingsw;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +21,8 @@ import com.amazonaws.auth.CognitoCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ForgotPasswordContinuation;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.ForgotPasswordHandler;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.amazonaws.regions.Regions;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
@@ -32,7 +40,9 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView profileAddress;
     private TextView profileCity;
     private Customer currentCustomer;
-
+    private String oldPassword;
+    private String newPassword;
+    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +73,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void change_pass(View view) {
-        Toast.makeText(this, "Change Password Clicked", Toast.LENGTH_SHORT).show();
+        Intent changePassword = new Intent(this,ChangePasswordActivity.class);
+        this.startActivity(changePassword);
     }
 
 
@@ -119,4 +130,6 @@ public class ProfileActivity extends AppCompatActivity {
         CognitoUser curr = CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser();
         CognitoUserPoolShared.getInstance().getUserPool().getUser(curr.getUserId()).getDetailsInBackground(handler);
     }
+
+
 }

@@ -138,11 +138,13 @@ public class ShippingTabFragment extends Fragment {
     }
 
     public void  displayPassedShippingInfo(Customer ofCustomer){
-        email.setText(ofCustomer.getEmail());
-        name.setText(ofCustomer.getName());
-        surname.setText(ofCustomer.getSurname());
-        city.setText(ofCustomer.getCity());
-        address.setText(ofCustomer.getAddress());
+        if(ofCustomer != null){
+            email.setText(ofCustomer.getEmail());
+            name.setText(ofCustomer.getName());
+            surname.setText(ofCustomer.getSurname());
+            city.setText(ofCustomer.getCity());
+            address.setText(ofCustomer.getAddress());
+        }
     }
 
     interface SendCustomer{

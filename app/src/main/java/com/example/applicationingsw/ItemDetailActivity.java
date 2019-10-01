@@ -1,12 +1,15 @@
 package com.example.applicationingsw;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -116,8 +119,9 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
 
 
     public void increaseQuantity(){
-        int quantity = Integer.parseInt(quantityTextView.getText().toString());
-        quantityTextView.setText(String.valueOf(quantity+1));
+        Integer quantity = Integer.valueOf(quantityTextView.getText().toString());
+        quantity++;
+        quantityTextView.setText(quantity.toString());
 
     }
 
@@ -159,9 +163,24 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
     }
 
     public void addToCart(Item itemToAdd){
-        Toast.makeText(getApplicationContext(),itemToAdd.getName() + " added", Toast.LENGTH_SHORT).show();
-        int quantity = Integer.valueOf(quantityTextView.getText().toString());
-        Cart.getInstance().addItemInCart(itemToAdd,quantity);
+        if (itemToAdd.getQuantity()>0){
+            Toast.makeText(getApplicationContext(),itemToAdd.getName() + " added", Toast.LENGTH_SHORT).show();
+            int quantity = Integer.valueOf(quantityTextView.getText().toString());
+            Cart.getInstance().addItemInCart(itemToAdd,quantity);
+        }
+        else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Item not available")
+                    .setMessage("We're sorry but this item is not available anymore. Please wait until it will be newly available!")
+                    .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+
     }
 
     public void goToCart(){

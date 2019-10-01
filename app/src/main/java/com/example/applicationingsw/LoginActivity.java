@@ -37,6 +37,7 @@ public class LoginActivity extends Activity {
     private EditText passwordText ;
     private Button loginButton ;
     private TextView signupLink ;
+    private TextView recoverPasswordLink;
     private ProgressDialog progressDialog ;
 
     @Override
@@ -47,13 +48,19 @@ public class LoginActivity extends Activity {
         passwordText = findViewById(R.id.input_password);
         loginButton = findViewById(R.id.btn_login);
         signupLink = findViewById(R.id.link_signup);
+        recoverPasswordLink = findViewById(R.id.forgot_password_link);
+        recoverPasswordLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recoverPassword();
+            }
+        });
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
             }
         });
-
         signupLink.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -85,6 +92,11 @@ public class LoginActivity extends Activity {
 
         loginWithCognito(email,password);
 
+    }
+
+    public void recoverPassword(){
+        Intent i = new Intent(this,RecoverPasswordActivity.class);
+        startActivity(i);
     }
 
 

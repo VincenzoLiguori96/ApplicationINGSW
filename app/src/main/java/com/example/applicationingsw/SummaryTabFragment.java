@@ -52,7 +52,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class SummaryTabFragment extends Fragment implements PaymentMethod {
-
+//TODO COORDINA I TEMPI DI TIMEOUT delle richieste POST ALLE API, SUPPONI L'IMPOSSIBILITà DI PROCEDERE
 
     private View summaryView;
     private TextView buyerName;
@@ -275,6 +275,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                                         .setMessage("We're sorry but one or more items are not available anymore. Try to reduce your quantity or wait until they will be newly available.")
                                         .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {
+                                                Cart.getInstance().clearCart();
                                                 cancelOrderOnDB(cancelOrderEndpoint);
                                             }
                                         })

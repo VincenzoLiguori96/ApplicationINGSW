@@ -54,5 +54,13 @@
             android:gravity="center"
             android:textSize="16dip"/>
 
+        <TextView android:id="@+id/forgot_password_link"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="Recover password"
+            android:gravity="center"
+            android:textSize="16dip"/>
+
     </LinearLayout>
 </ScrollView>

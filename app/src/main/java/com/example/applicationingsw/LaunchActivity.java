@@ -8,6 +8,7 @@ import android.util.Log;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ForgotPasswordContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
@@ -20,6 +21,7 @@ public class LaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
         CognitoUserPool userPool = CognitoUserPoolShared.getInstance().getUserPool();
         CognitoUser savedUser = userPool.getCurrentUser();
+        //TODO trova un modo per risolvere se non c'è internet
         savedUser.getDetailsInBackground(new GetDetailsHandler() {
             @Override
             public void onSuccess(CognitoUserDetails cognitoUserDetails) {
