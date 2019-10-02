@@ -67,7 +67,7 @@ public class RecoverPasswordActivity extends Activity {
                         progressDialog.dismiss();
                     }
                 }
-                new AlertDialog.Builder(RecoverPasswordActivity.this)
+                new AlertDialog.Builder(RecoverPasswordActivity.this )
                         .setTitle("Password updated!")
                         .setMessage("Your password has been successfully changed.")
                         .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
