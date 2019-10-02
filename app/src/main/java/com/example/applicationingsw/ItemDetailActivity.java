@@ -2,9 +2,11 @@ package com.example.applicationingsw;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -41,7 +43,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
     private TextView availabilityTextView;
     private LinearLayout addToCart ;
     private Item currentItem;
-
+    private Vibrator vibe ;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,6 +52,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         leftSideMenu =findViewById( R.id.drawer_layout);
         setNavigationViewListener();
         Intent intent = getIntent();
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         currentItem = intent.getParcelableExtra("CurrentItem");
         //TODO creare una classe statica in cui mettere questi metodi di inizializzazione del menu a toolbar?
         menuImageView = findViewById(R.id.leftMenuImage);
@@ -122,14 +125,18 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         Integer quantity = Integer.valueOf(quantityTextView.getText().toString());
         quantity++;
         quantityTextView.setText(quantity.toString());
+        vibe.vibrate(75);
+
 
     }
 
 
     public void decreaseQuantity(){
         int quantity = Integer.parseInt(quantityTextView.getText().toString());
-        if(quantity >0){
+        if(quantity >1){
             quantityTextView.setText(String.valueOf(quantity-1));
+            vibe.vibrate(75);
+
         }
     }
 
@@ -163,7 +170,9 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
     }
 
     public void addToCart(Item itemToAdd){
+
         if (itemToAdd.getQuantity()>0){
+            vibe.vibrate(100);
             Toast.makeText(getApplicationContext(),itemToAdd.getName() + " added", Toast.LENGTH_SHORT).show();
             int quantity = Integer.valueOf(quantityTextView.getText().toString());
             Cart.getInstance().addItemInCart(itemToAdd,quantity);

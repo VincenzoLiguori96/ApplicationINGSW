@@ -13,12 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ForgotPasswordContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.ForgotPasswordHandler;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
-import java.util.concurrent.ExecutorCompletionService;
 
 public class RecoverPasswordActivity extends Activity {
     private EditText emailEditText;
@@ -67,7 +65,7 @@ public class RecoverPasswordActivity extends Activity {
                         progressDialog.dismiss();
                     }
                 }
-                new AlertDialog.Builder(RecoverPasswordActivity.this )
+                new AlertDialog.Builder(RecoverPasswordActivity.this)
                         .setTitle("Password updated!")
                         .setMessage("Your password has been successfully changed.")
                         .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {

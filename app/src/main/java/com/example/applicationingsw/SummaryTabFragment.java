@@ -15,6 +15,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -66,7 +67,8 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     private int[] IMAGE = {R.drawable.cio_card_io_logo, R.drawable.ic_list, R.drawable.ic_close_tag,
             R.drawable.ic_add_to_cart, R.drawable.ic_cart};
     private CartAdapter baseAdapter;
-    ProgressDialog loadingDialog;
+    private ProgressDialog loadingDialog;
+    private ImageView clearCartIcon;
     private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
     private String invoiceEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/invoice";
     private String cancelOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/recoverorder";
@@ -79,6 +81,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         buyerAddress = summaryView.findViewById((R.id.buyerAddress));
         buyerName = summaryView.findViewById(R.id.buyerName);
         amount = summaryView.findViewById(R.id.amount);
+        clearCartIcon = summaryView.findViewById(R.id.clearCart);
         getUserData();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ Currency.getInstance(Locale.getDefault()).getSymbol());
@@ -107,8 +110,14 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         getActivity().startService(intent);
         baseAdapter = new CartAdapter(getActivity(), Cart.getInstance()) {
         };
-
         listview.setAdapter(baseAdapter);
+        clearCartIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Cart.getInstance().clearCart();
+                baseAdapter.notifyDataSetChanged();
+            }
+        });
         return  summaryView;
 
     }
@@ -277,6 +286,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                                             public void onClick(DialogInterface dialog, int which) {
                                                 Cart.getInstance().clearCart();
                                                 cancelOrderOnDB(cancelOrderEndpoint);
+                                                baseAdapter.notifyDataSetChanged();
                                             }
                                         })
                                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -434,6 +444,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                         sendInvoice(invoiceEndpoint);
                     }
                     Cart.getInstance().clearCart();
+                    baseAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

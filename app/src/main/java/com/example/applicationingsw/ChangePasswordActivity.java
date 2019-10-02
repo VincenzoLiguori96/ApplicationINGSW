@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
@@ -15,6 +18,7 @@ public class ChangePasswordActivity extends Activity {
     private EditText oldPasswordEditText;
     private EditText newPasswordEditText;
     private EditText newPasswordConfirmEditText;
+    private Button buttonChangePassword;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -23,6 +27,14 @@ public class ChangePasswordActivity extends Activity {
         oldPasswordEditText = findViewById(R.id.oldPassword);
         newPasswordEditText = findViewById(R.id.newPasswordChange);
         newPasswordConfirmEditText = findViewById(R.id.confirmPasswordChange);
+        buttonChangePassword = findViewById(R.id.passwordChangeDone);
+        buttonChangePassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changePasswordClicked();
+            }
+        });
+
     }
 
     public void changePasswordClicked(){
@@ -68,9 +80,10 @@ public class ChangePasswordActivity extends Activity {
 
             @Override
             public void onFailure(Exception exception) {
+            Log.e("CHANGEPASSWORDACTIVITY","porco dio",exception);
                 new AlertDialog.Builder(ChangePasswordActivity.this)
                         .setTitle("Can not change password!")
-                        .setMessage("Your password can not be updated. Error: " + exception.getLocalizedMessage())
+                        .setMessage("Your password can not be updated. Error: " + exception.getMessage())
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
@@ -84,6 +97,6 @@ public class ChangePasswordActivity extends Activity {
                         .show();
             }
         };
-        CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().changePassword(oldPassword, newPassword, handler);
+        CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().changePasswordInBackground(oldPassword, newPassword, handler);
     }
 }
