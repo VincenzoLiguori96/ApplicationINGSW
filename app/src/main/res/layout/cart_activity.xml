@@ -104,7 +104,7 @@
         android:layout_height="1dp"
         android:background="#dad8d8"
         android:gravity="bottom"
-        android:layout_above="@+id/amount"
+        android:layout_above="@+id/amountll"
         android:elevation="1dp"
         />
 
@@ -113,7 +113,7 @@
     <!--******TOTAL*******-->
 
     <LinearLayout
-        android:id="@+id/amount"
+        android:id="@+id/amountll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
