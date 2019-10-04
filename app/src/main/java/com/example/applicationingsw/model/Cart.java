@@ -1,7 +1,7 @@
 package com.example.applicationingsw.model;
 
 import android.util.Log;
-import android.util.Pair;
+import android.support.v4.util.Pair;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -39,17 +39,11 @@ public class Cart {
      * The private constructor for the CartSingleton class
      */
     private Cart() {
-        getCartIDFromAPI(cartIDEndpoint);
     }
 
     public static synchronized Cart getInstance() {
         if (instance == null) {
             instance = new Cart();
-        }
-        else{
-            if(instance.getCartID() == -1){
-                instance.getCartIDFromAPI(cartIDEndpoint);
-            }
         }
         return instance;
     }
@@ -57,6 +51,7 @@ public class Cart {
     public void addItemInCart(Item anItem, Integer aQuantity){
         boolean alreadyInCart = false;
         for(Pair<Item,Integer> itemInCart : itemsInCart){
+            System.out.println(itemInCart);
             if(itemInCart.first.getId()== anItem.getId()){
                 alreadyInCart = true;
             }
@@ -101,6 +96,7 @@ public class Cart {
             }
         }
     }
+
     public void pay(PaymentMethod method) {
         float totalCost = calculateTotalPrice();
         method.pay(totalCost);
@@ -111,6 +107,7 @@ public class Cart {
      * @param endpoint : The endpoint of getCart resource.
      */
     public void getCartIDFromAPI(String endpoint){
+        Log.e("CART ID",String.valueOf(cartID));
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
         try {
             JSONObject jsonBody = new JSONObject();

@@ -11,7 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.util.Pair;
+import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -376,17 +376,16 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
 
 
     public void cancelOrderOnDB(final String endpoint){
+        Log.e("CART ID",String.valueOf(Cart.getInstance().getCartID()));
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
         JSONObject jsonBody = Cart.getInstance().getCartAsJson();
         final String requestBody = jsonBody.toString();
-        Log.e("BODU ORDER:",requestBody);
         final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONObject responseBody = new JSONObject(response);
                     boolean result = responseBody.getBoolean("success");
-                    Log.e("RISULTATO POST ORDER",responseBody.toString());
                     if(!result){
                         cancelOrderOnDB(endpoint);
                     }

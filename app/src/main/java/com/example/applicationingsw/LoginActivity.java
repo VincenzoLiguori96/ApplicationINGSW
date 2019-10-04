@@ -26,7 +26,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.Authentic
 import com.amazonaws.regions.Regions;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
-
+//TODO RENDI MODALE GLI ALERT
 public class LoginActivity extends Activity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
