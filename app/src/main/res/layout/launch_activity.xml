@@ -37,7 +37,7 @@
         android:layout_marginBottom="64dp"
         android:fontFamily="sans-serif-condensed-medium"
         android:lines="2"
-        android:text="The loading is taking a lot of time, check your connection."
+        android:text="If the loading is slow, please check your internet connection..."
         android:textColor="@android:color/holo_red_dark"
         android:textStyle="bold|italic"
         android:visibility="invisible"

@@ -51,7 +51,6 @@ public class Cart {
     public void addItemInCart(Item anItem, Integer aQuantity){
         boolean alreadyInCart = false;
         for(Pair<Item,Integer> itemInCart : itemsInCart){
-            System.out.println(itemInCart);
             if(itemInCart.first.getId()== anItem.getId()){
                 alreadyInCart = true;
             }
@@ -83,7 +82,7 @@ public class Cart {
     public float calculateTotalPrice(){
         float amount = 0;
         for(Pair<Item,Integer> itemInCart : itemsInCart){
-            amount += itemInCart.first.getPriceWithoutConcurrency() * itemInCart.second;
+            amount = amount + (itemInCart.first.getPriceWithoutConcurrency() * itemInCart.second);
         }
         return amount;
     }
@@ -107,7 +106,6 @@ public class Cart {
      * @param endpoint : The endpoint of getCart resource.
      */
     public void getCartIDFromAPI(String endpoint){
-        Log.e("CART ID",String.valueOf(cartID));
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
         try {
             JSONObject jsonBody = new JSONObject();
@@ -178,13 +176,10 @@ public class Cart {
                 singleItem = new JSONObject();
             }
             jsonBody.put("items", arrayOfItems);
-            if(getCartID() != -1){
+            if(getCartID() == -1){
                 getCartIDFromAPI(cartIDEndpoint);
-                jsonBody.put("cart", getCartID());
             }
-            else{
-
-            }
+            jsonBody.put("cart", getCartID());
         } catch (JSONException e) {
             e.printStackTrace();
         }

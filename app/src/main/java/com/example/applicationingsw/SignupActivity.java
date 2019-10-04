@@ -10,13 +10,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
-import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
-import android.icu.util.DateInterval;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -33,11 +32,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttribu
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
-import com.amazonaws.regions.Regions;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
-
-import java.util.Date;
-import java.util.Locale;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public class SignupActivity extends Activity {
@@ -89,6 +84,7 @@ public class SignupActivity extends Activity {
         birthdayText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                birthdayText.setTextColor(Color.DKGRAY);
                 DatePickerDialog dateDialog = new DatePickerDialog(SignupActivity.this);
                 dateDialog.setOnDateSetListener(date);
                 dateDialog.show();
@@ -128,7 +124,7 @@ public class SignupActivity extends Activity {
                 return view;
             }
         };
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item_layout);
         genderSpinner.setAdapter(spinnerArrayAdapter);
         genderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -141,6 +137,8 @@ public class SignupActivity extends Activity {
                     Toast.makeText
                             (getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
                             .show();
+                    ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.grey1));
+
                 }
                 TextView tv = (TextView) view;
                 if(position == 0){
@@ -317,7 +315,7 @@ public class SignupActivity extends Activity {
         String surname = surnameText.getText().toString();
         String city = cityText.getText().toString();
         String address = addressText.getText().toString();
-        String gender = genderSpinner.getSelectedItem().toString();;
+        String gender = genderSpinner.getSelectedItem().toString();
 
         if (name.isEmpty() || name.length() < 2) {
             nameText.setError("At least 2 characters!");
@@ -326,7 +324,7 @@ public class SignupActivity extends Activity {
             nameText.setError(null);
         }
 
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             emailText.setError("Enter a valid email address!");
             valid = false;
         } else {
@@ -363,6 +361,26 @@ public class SignupActivity extends Activity {
         }
         else{
             ((TextView)genderSpinner.getSelectedView()).setError(null);
+        }
+
+        if(myCalendar.getTime().after(Calendar.getInstance().getTime())){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                birthdayText.setTooltipText("Are you coming from the future?");
+            }
+            birthdayText.setError("Are you coming from the future?");
+            birthdayText.setText("Are you coming from the future?");
+            birthdayText.setTextColor(Color.RED);
+            valid = false;
+        }
+        Log.e("SIGNUP", birthdayText.getText().toString());
+        if(birthdayText.getText().toString().equals("") || birthdayText.getText().toString() == null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                birthdayText.setTooltipText("Select a birthdate.");
+            }
+            birthdayText.setError("Select a birthdate.");
+            birthdayText.setText("Select a birthdate.");
+            birthdayText.setTextColor(Color.RED);
+            valid = false;
         }
 
         return valid;

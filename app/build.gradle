@@ -30,6 +30,7 @@ dependencies {
     implementation 'com.android.volley:volley:1.1.1'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.18'
     testImplementation 'junit:junit:4.12'
+    testImplementation 'org.json:json:20140107'
     testImplementation 'org.apache.httpcomponents:httpclient:4.5.10'
     testImplementation 'com.android.volley:volley:1.1.1'
     implementation 'com.github.Jay-Goo:RangeSeekBar:v3.0.0'
