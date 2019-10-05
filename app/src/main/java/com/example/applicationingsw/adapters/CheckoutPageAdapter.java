@@ -4,8 +4,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.example.applicationingsw.ShippingTabFragment;
-import com.example.applicationingsw.SummaryTabFragment;
+import com.example.applicationingsw.activities.ShippingTabFragment;
+import com.example.applicationingsw.activities.SummaryTabFragment;
 
 public class CheckoutPageAdapter extends FragmentStatePagerAdapter {
     private int mNumOfTabs;

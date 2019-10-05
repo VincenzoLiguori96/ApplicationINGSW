@@ -1,4 +1,4 @@
-package com.example.applicationingsw;
+package com.example.applicationingsw.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
+import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
@@ -63,4 +64,5 @@ public class LaunchActivity extends AppCompatActivity {
     public void initializeCart(){
         Cart.getInstance().getCartIDFromAPI("https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart");
     }
+
 }

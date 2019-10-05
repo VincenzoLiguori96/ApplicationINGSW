@@ -14,19 +14,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material">
-        <activity android:name=".ApplyFilterActivity"
+        <activity android:name=".activities.ApplyFilterActivity"
             android:theme="@style/AppTheme.CustomPopup"></activity>
-        <activity android:name=".ItemDetailActivity"
+        <activity android:name=".activities.ItemDetailActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
-        <activity android:name=".ProfileActivity"
+        <activity android:name=".activities.ProfileActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
-        <activity android:name=".ChangePasswordActivity">
+        <activity android:name=".activities.ChangePasswordActivity">
         </activity>
-        <activity android:name=".RecoverPasswordActivity"></activity>
+        <activity android:name=".activities.RecoverPasswordActivity"></activity>
         <activity
-            android:name=".LaunchActivity"
+            android:name=".activities.LaunchActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,17 +35,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SignupActivity"
+            android:name=".activities.SignupActivity"
             android:theme="@android:style/Theme.Material" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:theme="@android:style/Theme.Material" />
         <activity
-            android:name=".CartActivity"
+            android:name=".activities.CartActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
         </activity>
         <activity
-            android:name=".DashboardActivity"
+            android:name=".activities.DashboardActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

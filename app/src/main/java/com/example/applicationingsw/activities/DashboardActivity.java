@@ -1,4 +1,4 @@
-package com.example.applicationingsw;
+package com.example.applicationingsw.activities;
 
 import android.app.AlertDialog;
 import android.app.SearchManager;
@@ -24,33 +24,29 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.example.applicationingsw.Services.CartAccessService;
+import com.example.applicationingsw.R;
+import com.example.applicationingsw.services.CartAccessService;
 import com.example.applicationingsw.adapters.ItemsAdapter;
 import com.example.applicationingsw.helpers.Space;
+import com.example.applicationingsw.model.AWSItemDAO;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 import com.example.applicationingsw.model.Item;
+import com.example.applicationingsw.model.ItemDAO;
+import com.example.applicationingsw.model.NetworkOperationsListener;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class DashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ItemsAdapter.ItemsAdapterListener {
     private ItemsAdapter itemsAdapter;
     private ImageView menuImageView;
     private ImageView cartImageView;
     private ImageView filteredSearchImageView;
-    private String apiItemEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/items";
     private static final int REQUEST_FILTER = 0;
     private SwipeRefreshLayout refreshLayout;
     private DrawerLayout leftSideMenu;
@@ -126,7 +122,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             }
         });
         itemsAdapter = new ItemsAdapter(this,this,itemsList);
-        loadItemsData(apiItemEndpoint);
+        loadItemsData();
         //add on on Scroll listener
         //add space between cards
         //Create new itemsAdapter
@@ -155,27 +151,23 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 Bundle extras = dataBack.getExtras();
                 Item prova = null;
                 String query_string = extras.getString("EXTRA_QUERY_STRING");
-                String filteredEndpoint = apiItemEndpoint+query_string;
-                Log.e("API endpoint: ",filteredEndpoint);
+                Log.e("DASHACT_API endpoint: ",query_string);
                 itemsList.clear();
                 itemsAdapter.notifyDataSetChanged();
-                getItemsFromAPI(filteredEndpoint);
-
+                getItemsFiltered(query_string);
             }
         }
     }
 
 
-    private void loadItemsData(String apiEndPoint) {
-        //show loading in recyclerview
-        itemsAdapter.showLoading();
-        getItemsFromAPI(apiEndPoint);
+    private void loadItemsData() {
+        getItemsFromAPI();
     }
 
 
     public void refreshData(){
         itemsList.clear();
-        getItemsFromAPI(apiItemEndpoint);
+        getItemsFromAPI();
         itemsAdapter.addItems(itemsList);
         itemsAdapter.notifyDataSetChanged();
     }
@@ -184,59 +176,83 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    public void getItemsFromAPI(String endpoint){
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        final JsonObjectRequest request = new JsonObjectRequest(endpoint, null, new Response.Listener<JSONObject>() {
+    public void getItemsFiltered(String queryStringParameters){
+        ItemDAO dao = new AWSItemDAO();
+        itemsAdapter.showLoading();
+        dao.readItemsWithFilter(new NetworkOperationsListener(){
             @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray jsonArrayOfItems = response.getJSONArray("items");
-                    for(int i = 0; i< jsonArrayOfItems.length();i++){
-                        JSONObject item = jsonArrayOfItems.getJSONObject(i);
-                        int id = item.getInt("id");
-                        String name = item.getString("name");
-                        String manufacturer = item.getString("manufacturer");
-                        float price = new Float(item.getDouble("price"));
-                        String description = item.getString("description");
-                        String imageUrl = item.getString("url");
-                        String category = item.getString("category");
-                        Integer quantity = item.getInt("quantity");
-                        ArrayList<String> tags = new ArrayList<String>();
-                        JSONArray jsonArray = item.getJSONArray("tags");
-                        if (jsonArray != null) {
-                            int len = jsonArray.length();
-                            for (int j=0;j<len;j++){
-                                tags.add(jsonArray.getString(j));
-                            }
-                        }
-                        Item currentItem = new Item(id,name,manufacturer,price,description,quantity,imageUrl,category,tags);
-                        currentItem.setNew(new Random().nextBoolean());
-                        itemsList.add(currentItem);
-                        itemsAdapter.notifyDataSetChanged();
-                        Log.e("ALLA FINE GLI ",String.valueOf(itemsAdapter.getItemCount()));
-                    }
+            public void getResult(Object object) {
+                if(itemsAdapter.loading){
                     itemsAdapter.hideLoading();
-                } catch (JSONException e) {
-                    Log.e("PORCA xception",e.getLocalizedMessage());
                 }
-                catch (Exception e){
-                    Log.e("PORCA MADO",e.toString(),e);
+                Item castedResult = (Item) object;
+                itemsList.add(castedResult);
+                itemsAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void getError(Object object) {
+                if ( object instanceof JSONException){
+                    JSONException exc = (JSONException) object;
+                    Log.e("DASHBOARDACTIVITY", exc.getLocalizedMessage());
+                }
+                if ( object instanceof VolleyError){
+                    VolleyError exc = (VolleyError) object;
+                    manageNetworkingError(exc);
+                }
+                else{
                     if(refreshLayout.isRefreshing()){
                         refreshLayout.setRefreshing(false);
                         itemsAdapter.notifyDataSetChanged();
                     }
                 }
-                finally {
-                    requestCompleted();
+            }
+
+            @Override
+            public void onFinish() {
+                requestCompleted();
+            }
+        },queryStringParameters);
+    }
+
+    public void getItemsFromAPI(){
+        ItemDAO dao = new AWSItemDAO();
+        itemsAdapter.showLoading();
+        dao.readAllItems(new NetworkOperationsListener() {
+            @Override
+            public void getResult(Object object) {
+                if(itemsAdapter.loading){
+                    itemsAdapter.hideLoading();
+                }
+                Item castedResult = (Item) object;
+                itemsList.add(castedResult);
+                itemsAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void getError(Object object) {
+                if ( object instanceof JSONException){
+                    JSONException exc = (JSONException) object;
+                    Log.e("DASHBOARDACTIVITY", exc.getLocalizedMessage());
+                }
+                if ( object instanceof VolleyError){
+                    VolleyError exc = (VolleyError) object;
+                    manageNetworkingError(exc);
+                }
+                else{
+                    if(refreshLayout.isRefreshing()){
+                        refreshLayout.setRefreshing(false);
+                        itemsAdapter.notifyDataSetChanged();
+                    }
                 }
             }
-        }, new Response.ErrorListener() {
+
             @Override
-            public void onErrorResponse(VolleyError error) {
-                manageNetworkingError(error);
+            public void onFinish() {
+                requestCompleted();
             }
         });
-        requestQueue.add(request);
+        requestCompleted();
     }
 
     public void requestCompleted(){
@@ -245,7 +261,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             itemsAdapter.notifyDataSetChanged();
             itemsAdapter.hideLoading();
             recyclerViewProducts.setAdapter(itemsAdapter);
-            Log.e("ALLA FINE GLI ",String.valueOf(itemsAdapter.getItemCount()));
         }
     }
 

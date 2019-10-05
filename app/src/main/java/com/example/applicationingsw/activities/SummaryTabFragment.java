@@ -1,4 +1,4 @@
-package com.example.applicationingsw;
+package com.example.applicationingsw.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -31,7 +31,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.applicationingsw.Services.PaypalConfigurationService;
+import com.example.applicationingsw.App;
+import com.example.applicationingsw.services.PaymentMethod;
+import com.example.applicationingsw.R;
+import com.example.applicationingsw.services.PaypalConfigurationService;
 import com.example.applicationingsw.adapters.CartAdapter;
 import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
@@ -53,7 +56,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public class SummaryTabFragment extends Fragment implements PaymentMethod {
-//TODO COORDINA I TEMPI DI TIMEOUT delle richieste POST ALLE API, SUPPONI L'IMPOSSIBILITà DI PROCEDERE
 
     private View summaryView;
     private TextView buyerName;

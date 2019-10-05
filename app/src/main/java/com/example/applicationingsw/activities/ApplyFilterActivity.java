@@ -1,4 +1,4 @@
-package com.example.applicationingsw;
+package com.example.applicationingsw.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -36,8 +36,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.applicationingsw.R;
+import com.example.applicationingsw.model.AWSCategoryDAO;
 import com.example.applicationingsw.model.Category;
+import com.example.applicationingsw.model.CategoryDAO;
 import com.example.applicationingsw.model.Item;
+import com.example.applicationingsw.model.NetworkOperationsListener;
 import com.jaygoo.widget.RangeSeekBar;
 
 import org.json.JSONArray;
@@ -65,6 +69,7 @@ public class ApplyFilterActivity extends Activity {
         setContentView(R.layout.activity_search_by_filters);
         setLayout();
         spinner = findViewById(R.id.spinnerCategories);
+        getCategoriesFromAPI();
         tagContainer = findViewById(R.id.tagsContainer);
         priceRange = findViewById(R.id.priceRange);
         manufacturerTextInput = findViewById(R.id.manufacturerTextInput);
@@ -101,7 +106,6 @@ public class ApplyFilterActivity extends Activity {
         priceRange.getLeftSeekBar().setIndicatorTextDecimalFormat("0.00");
         priceRange.setProgress(999.99f);
         priceRange.setProgress(0,999.99f);
-        getCategoriesFromAPI();
     }
 
 
@@ -283,7 +287,7 @@ public class ApplyFilterActivity extends Activity {
     }
 
     public void getCategoriesFromAPI(){
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        /*RequestQueue requestQueue = Volley.newRequestQueue(this);
         String apiItemEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/categories/allcategories";
         final JsonObjectRequest request = new JsonObjectRequest(apiItemEndpoint, null, new Response.Listener<JSONObject>() {
             @Override
@@ -308,7 +312,24 @@ public class ApplyFilterActivity extends Activity {
 
             }
         });
-        requestQueue.add(request);
+        requestQueue.add(request);*/
+        CategoryDAO dao = new AWSCategoryDAO();
+        dao.readAllCategories(new NetworkOperationsListener() {
+            @Override
+            public void getResult(Object object) {
+                categories.add((String)object);
+            }
+
+            @Override
+            public void getError(Object object) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                requestCompleted();
+            }
+        });
     }
 
     public void requestCompleted(){

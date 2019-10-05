@@ -13,7 +13,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.applicationingsw.App;
-import com.example.applicationingsw.PaymentMethod;
+import com.example.applicationingsw.services.PaymentMethod;
 
 import org.json.JSONArray;
 import org.json.JSONException;

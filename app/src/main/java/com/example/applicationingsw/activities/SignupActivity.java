@@ -1,4 +1,4 @@
-package com.example.applicationingsw;
+package com.example.applicationingsw.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -32,6 +32,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttribu
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
+import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
 @RequiresApi(api = Build.VERSION_CODES.N)

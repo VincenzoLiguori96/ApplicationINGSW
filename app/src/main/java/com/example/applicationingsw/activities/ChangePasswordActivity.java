@@ -1,4 +1,4 @@
-package com.example.applicationingsw;
+package com.example.applicationingsw.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
+import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
 public class ChangePasswordActivity extends Activity {
