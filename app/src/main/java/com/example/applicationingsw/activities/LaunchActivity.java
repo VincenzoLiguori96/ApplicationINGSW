@@ -18,7 +18,6 @@ import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
 public class LaunchActivity extends AppCompatActivity {
-    private final String TAG = "Launch Activity";
     private ImageView logoView;
     private TextView slowConnectionHint;
 
@@ -30,6 +29,14 @@ public class LaunchActivity extends AppCompatActivity {
         slowConnectionHint = findViewById(R.id.loadingTextView);
         logoView = findViewById(R.id.logoImageView);
         logoView.setVisibility(View.VISIBLE);
+        decideStartingActivity();
+    }
+
+    public void initializeCart(){
+        Cart.getInstance().getCartIDFromAPI("https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart");
+    }
+
+    public void decideStartingActivity(){
         CognitoUserPool userPool = CognitoUserPoolShared.getInstance().getUserPool();
         final CognitoUser savedUser = userPool.getCurrentUser();
         final Handler handler = new Handler();
@@ -40,7 +47,6 @@ public class LaunchActivity extends AppCompatActivity {
                 savedUser.getDetailsInBackground(new GetDetailsHandler() {
                     @Override
                     public void onSuccess(CognitoUserDetails cognitoUserDetails) {
-                        Log.e(TAG, " utente salvato, vado al login");
                         Intent myIntent = new Intent(LaunchActivity.this, DashboardActivity.class);
                         LaunchActivity.this.startActivity(myIntent);
                         LaunchActivity.this.finish();
@@ -49,7 +55,6 @@ public class LaunchActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Exception exception) {
-                        Log.e(TAG, "Nessun utente salvato, vado al login" + exception.getLocalizedMessage());
                         Intent myIntent = new Intent(LaunchActivity.this, LoginActivity.class);
                         LaunchActivity.this.startActivity(myIntent);
                         LaunchActivity.this.finish();
@@ -59,10 +64,6 @@ public class LaunchActivity extends AppCompatActivity {
                 });
             }
         }, 2000);
-    }
-
-    public void initializeCart(){
-        Cart.getInstance().getCartIDFromAPI("https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart");
     }
 
 }

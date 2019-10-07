@@ -27,9 +27,7 @@ import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
 public class LoginActivity extends Activity {
-    private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
-    //Istanza di un user pool cognito
     private CognitoUserPool userPool ;
     private CognitoUser currentUser;
     private EditText emailText ;
@@ -73,9 +71,7 @@ public class LoginActivity extends Activity {
     }
 
     public void login() {
-        Log.d(TAG, "Login");
-
-        if (!validate()) {
+        if (!validateFields()) {
             onLoginFailed();
             return;
         }
@@ -116,14 +112,11 @@ public class LoginActivity extends Activity {
         // Callback handler for the sign-in process
         currentUser = userPool.getUser(email);
         CognitoUser saved = userPool.getCurrentUser();
-        Log.i(TAG, "Utente attuale:" + currentUser.getUserId());
-        Log.i(TAG, "Saved:" + saved.getUserId());
         AuthenticationHandler authenticationHandler = new AuthenticationHandler() {
 
 
             @Override
             public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {
-                Log.i(TAG,"Utente connesso");
                 progressDialog.dismiss();
                 Intent myIntent = new Intent(LoginActivity.this, DashboardActivity.class);
                 LoginActivity.this.startActivity(myIntent);
@@ -133,7 +126,6 @@ public class LoginActivity extends Activity {
             @Override
             public void getAuthenticationDetails(AuthenticationContinuation authenticationContinuation, String userId) {
                 // The API needs user sign-in credentials to continue
-                Log.i(TAG, "Utente con cui mi sono autenticato attuale:" + userId);
                 AuthenticationDetails authenticationDetails = new AuthenticationDetails(userId, password, null);
 
                 // Pass the user sign-in credentials to the continuation
@@ -150,14 +142,12 @@ public class LoginActivity extends Activity {
 
             @Override
             public void authenticationChallenge(ChallengeContinuation continuation) {
-                Log.i(TAG, "Continuation da authentication challenge: "+ continuation.getChallengeName() + continuation.getParameters() + continuation);
                 continuation.continueTask();
             }
 
             @Override
             public void onFailure(Exception exception) {
                 // Sign-in failed, check exception for the cause
-                Log.e(TAG, "Errore al login");
                 progressDialog.dismiss();
                 showAlertDialog(LoginActivity.this, "An error occured", "Error: "+exception.getLocalizedMessage()+ " Please retry.");
                 loginButton.setEnabled(true);
@@ -175,10 +165,6 @@ public class LoginActivity extends Activity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess() {
-        loginButton.setEnabled(true);
-        finish();
-    }
 
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
@@ -186,7 +172,7 @@ public class LoginActivity extends Activity {
         loginButton.setEnabled(true);
     }
 
-    public boolean validate() {
+    public boolean validateFields() {
         boolean valid = true;
 
         String email = emailText.getText().toString();

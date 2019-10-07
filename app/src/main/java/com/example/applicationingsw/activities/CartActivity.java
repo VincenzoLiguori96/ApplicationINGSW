@@ -13,7 +13,6 @@ import com.example.applicationingsw.adapters.CheckoutPageAdapter;
 import com.example.applicationingsw.model.Customer;
 
 public class CartActivity extends AppCompatActivity implements ShippingTabFragment.SendCustomer {
-    private Button buyButton;
     private ViewPager viewPager;
     private CheckoutPageAdapter adapter;
     @Override
@@ -50,11 +49,6 @@ public class CartActivity extends AppCompatActivity implements ShippingTabFragme
 
         });
     }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
 
     @Override
     public void send(Customer aCustomer,int toPage) {

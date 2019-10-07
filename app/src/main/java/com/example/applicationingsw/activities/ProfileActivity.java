@@ -30,9 +30,6 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView profileAddress;
     private TextView profileCity;
     private Customer currentCustomer;
-    private String oldPassword;
-    private String newPassword;
-    private ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

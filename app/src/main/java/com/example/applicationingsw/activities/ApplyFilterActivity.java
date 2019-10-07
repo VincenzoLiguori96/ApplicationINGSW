@@ -61,6 +61,7 @@ public class ApplyFilterActivity extends Activity {
     private TextInputEditText manufacturerTextInput;
     private TextInputEditText keywordTextInput;
     private TextView doneTextView;
+    private CategoryDAO categoryDAO = new AWSCategoryDAO();
     private List<String> tagsList = new ArrayList<>();
     private List<String> categories = new ArrayList<>();
     @Override
@@ -90,16 +91,14 @@ public class ApplyFilterActivity extends Activity {
         doneTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                passFilterQueryBack(getQueryStringParameters());
-                finish();
+                doneClicked();
             }
         });
         closeImageView = findViewById(R.id.popup_exit);
         closeImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(RESULT_CANCELED,null);
-                finish();
+                closeFilterView();
             }
         });
         priceRange.getRightSeekBar().setIndicatorTextDecimalFormat("0.00");
@@ -121,6 +120,16 @@ public class ApplyFilterActivity extends Activity {
         params.x = 0;
         params.y = 80;
         getWindow().setAttributes(params);
+    }
+
+    public void doneClicked(){
+        passFilterQueryBack(getQueryStringParameters());
+        finish();
+    }
+
+    public void closeFilterView(){
+        setResult(RESULT_CANCELED,null);
+        finish();
     }
 
     public boolean anyFilterSelected(){
@@ -287,34 +296,7 @@ public class ApplyFilterActivity extends Activity {
     }
 
     public void getCategoriesFromAPI(){
-        /*RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String apiItemEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/categories/allcategories";
-        final JsonObjectRequest request = new JsonObjectRequest(apiItemEndpoint, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray jsonArrayOfCategories = response.getJSONArray("elem");
-                    for(int i = 0; i< jsonArrayOfCategories.length();i++){
-                        JSONObject item = jsonArrayOfCategories.getJSONObject(i);
-                        String name = item.getString("name");
-                        categories.add(name);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                finally {
-                    requestCompleted();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        requestQueue.add(request);*/
-        CategoryDAO dao = new AWSCategoryDAO();
-        dao.readAllCategories(new NetworkOperationsListener() {
+        categoryDAO.readAllCategories(new NetworkOperationsListener() {
             @Override
             public void getResult(Object object) {
                 categories.add((String)object);
@@ -327,12 +309,12 @@ public class ApplyFilterActivity extends Activity {
 
             @Override
             public void onFinish() {
-                requestCompleted();
+                categoryRequestCompleted();
             }
         });
     }
 
-    public void requestCompleted(){
+    public void categoryRequestCompleted(){
         categories.add(0,"Select an item...");
         categories.add("");
         setSpinnerAdapter(categories);
@@ -399,13 +381,10 @@ public class ApplyFilterActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        for(String tag: tagsList){
-            Log.e("Tag: ",tag);
-        }
         passFilterQueryBack(getQueryStringParameters());
     }
 
-    public void passFilterQueryBack(String queryStringParams) {
+    private void passFilterQueryBack(String queryStringParams) {
         Intent filterQuery = new Intent();
         Bundle extras = new Bundle();
         extras.putString("EXTRA_QUERY_STRING",queryStringParams);

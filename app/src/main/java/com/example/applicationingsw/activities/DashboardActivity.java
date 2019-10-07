@@ -53,6 +53,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     private List<Item> itemsList = new ArrayList<>();
     private SearchView searchView;
     private RecyclerView recyclerViewProducts;
+    private ItemDAO itemDAO = new AWSItemDAO();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,9 +178,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void getItemsFiltered(String queryStringParameters){
-        ItemDAO dao = new AWSItemDAO();
         itemsAdapter.showLoading();
-        dao.readItemsWithFilter(new NetworkOperationsListener(){
+        itemDAO.readItemsWithFilter(new NetworkOperationsListener(){
             @Override
             public void getResult(Object object) {
                 if(itemsAdapter.loading){
@@ -216,9 +216,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void getItemsFromAPI(){
-        ItemDAO dao = new AWSItemDAO();
         itemsAdapter.showLoading();
-        dao.readAllItems(new NetworkOperationsListener() {
+        itemDAO.readAllItems(new NetworkOperationsListener() {
             @Override
             public void getResult(Object object) {
                 if(itemsAdapter.loading){
