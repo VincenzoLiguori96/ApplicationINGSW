@@ -37,27 +37,17 @@ public class RecoverPasswordActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if(newPasswordConfirmEditText.getText().toString().equals(newPasswordEditText.getText().toString())){
-                    codeRequested();
+                    requestRecoverCode();
                 }
                 else{
-                    new AlertDialog.Builder(RecoverPasswordActivity.this)
-                            .setTitle("Password not matching!")
-                            .setMessage("Please reinsert your password. The one in the new password field is different from the one in the confirm new password field.")
-                            .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            })
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
+                    passwordNotMatchingHandler();
                 }
             }
         });
     }
 
 
-    public void codeRequested(){
+    public void requestRecoverCode(){
         ForgotPasswordHandler handler = new ForgotPasswordHandler() {
             @Override
             public void onSuccess() {
@@ -91,7 +81,7 @@ public class RecoverPasswordActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        showEnterCodeDialog(continuation);
+                        showValidateRecoverCodeDialog(continuation);
                     }
                 });
             }
@@ -129,7 +119,8 @@ public class RecoverPasswordActivity extends Activity {
         CognitoUserPoolShared.getInstance().getUserPool().getUser(emailEditText.getText().toString()).forgotPasswordInBackground(handler);
     }
 
-    public void showEnterCodeDialog(final ForgotPasswordContinuation continuation){
+
+    public void showValidateRecoverCodeDialog(final ForgotPasswordContinuation continuation){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter verification code:");
         View viewInflated = LayoutInflater.from(this).inflate(R.layout.code_input_dialog, (ViewGroup) requestCodeButton.getParent(), false);
@@ -153,6 +144,20 @@ public class RecoverPasswordActivity extends Activity {
             }
         });
         builder.show();
+    }
+
+    public void passwordNotMatchingHandler(){
+        new AlertDialog.Builder(RecoverPasswordActivity.this)
+                .setTitle("Password not matching!")
+                .setMessage("Please reinsert your password. The one in the new password field is different from the one in the confirm new password field.")
+                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     public void confirmReset(ForgotPasswordContinuation continuation,String code){

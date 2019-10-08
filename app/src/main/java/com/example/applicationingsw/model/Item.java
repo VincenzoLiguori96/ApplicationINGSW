@@ -27,7 +27,6 @@ public class Item implements Parcelable {
     private String category;
     private String url;
     private boolean isLoading = false;
-    private boolean isNew = true;
 
     protected Item(Parcel in) {
         if (in.readByte() == 0) {
@@ -48,7 +47,6 @@ public class Item implements Parcelable {
         category = in.readString();
         url = in.readString();
         isLoading = in.readByte() != 0;
-        isNew = in.readByte() != 0;
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -177,13 +175,6 @@ public class Item implements Parcelable {
         isLoading = loading;
     }
 
-    public boolean isNew() {
-        return isNew;
-    }
-
-    public void setNew(boolean aNew) {
-        isNew = aNew;
-    }
 
     @Override
     public String toString(){
@@ -217,6 +208,5 @@ public class Item implements Parcelable {
         parcel.writeString(category);
         parcel.writeString(url);
         parcel.writeByte((byte) (isLoading ? 1 : 0));
-        parcel.writeByte((byte) (isNew ? 1 : 0));
     }
 }

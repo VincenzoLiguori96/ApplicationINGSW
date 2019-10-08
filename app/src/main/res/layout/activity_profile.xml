@@ -371,7 +371,7 @@
                             android:paddingLeft="12dp"
                             android:paddingRight="12dp"
                             android:paddingTop="4dp"
-                            android:onClick="change_pass"
+                            android:onClick="changePassword"
                             android:paddingBottom="4dp"
                             android:id="@+id/reset_pass"/>
                     </android.support.v7.widget.CardView>

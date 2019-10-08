@@ -60,21 +60,18 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     private View summaryView;
     private TextView buyerName;
     private TextView buyerAddress;
-    private ListView listview;
     private TextView editShippingDetailsButton;
     private TextView amount;
     private TextView payButton;
     private int retriesCount;
+    private ListView listview;
     private Customer currentCustomer;
-    private int[] IMAGE = {R.drawable.cio_card_io_logo, R.drawable.ic_list, R.drawable.ic_close_tag,
-            R.drawable.ic_add_to_cart, R.drawable.ic_cart};
     private CartAdapter baseAdapter;
     private ProgressDialog loadingDialog;
     private ImageView clearCartIcon;
     private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
     private String invoiceEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/invoice";
     private String cancelOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/recoverorder";
-    public SummaryTabFragment(){};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -224,7 +221,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
 
     public void goToShippingDetails(){
         try {
-            ShippingTabFragment.SendCustomer paymentToShippingFragment = (ShippingTabFragment.SendCustomer) getActivity();
+            SendCustomer paymentToShippingFragment = (SendCustomer) getActivity();
             paymentToShippingFragment.send(currentCustomer,1);
             CartActivity myActivity = (CartActivity) getActivity();
             myActivity.changeTab(1);
@@ -245,7 +242,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                 String savedCity = list.getAttributes().getAttributes().get("locale");
                 String birthdate = list.getAttributes().getAttributes().get("birthdate");
                 Customer customer = new Customer(savedName,savedSurname,savedAddress,savedEmail,"",savedCity,birthdate);
-                ShippingTabFragment.SendCustomer customerToPaymentFragment = (ShippingTabFragment.SendCustomer) getActivity();
+                SendCustomer customerToPaymentFragment = (SendCustomer) getActivity();
                 displayShippingInfo(customer);
                 customerToPaymentFragment.send(customer,1);
             }
@@ -255,7 +252,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
                 // Failed to retrieve the user details, probe exception for the cause
                 Log.e("Exc dettagli utente",exception.toString());
                 Customer customer = new Customer("","","","","","","");
-                ShippingTabFragment.SendCustomer customerToPaymentFragment = (ShippingTabFragment.SendCustomer) getActivity();
+                SendCustomer customerToPaymentFragment = (SendCustomer) getActivity();
                 customerToPaymentFragment.send(customer,1);
             }
         };

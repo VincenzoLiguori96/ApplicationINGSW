@@ -34,6 +34,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
 import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
+import com.example.applicationingsw.model.Customer;
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 public class SignupActivity extends Activity {
@@ -49,7 +50,7 @@ public class SignupActivity extends Activity {
     private Button signupButton;
     private Spinner genderSpinner;
     private TextView loginLink;
-    final Calendar myCalendar = Calendar.getInstance();
+    private final Calendar myCalendar = Calendar.getInstance();
 
     //Istanza di un user pool cognito
     private CognitoUserPool userPool ;
@@ -157,7 +158,7 @@ public class SignupActivity extends Activity {
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signup();
+                signupButtonClicked();
             }
         });
 
@@ -170,10 +171,10 @@ public class SignupActivity extends Activity {
         });
     }
 
-    public void signup() {
+    public void signupButtonClicked() {
         Log.d(TAG, "Signup");
 
-        if (!validate()) {
+        if (!validateFields()) {
             onSignupFailed();
             return;
         }
@@ -197,21 +198,22 @@ public class SignupActivity extends Activity {
         if ( !genderSpinner.getSelectedItem().toString().equals("Gender")){
             gender = genderSpinner.getSelectedItem().toString();
         }
-        signUpWithCognito(name,email,password,surname,city,address,gender,birthday);
+        Customer customer = new Customer(name,surname,address,email,gender,city,birthday);
+        signUpWithCognito(customer,password);
 
     }
 
-    public void signUpWithCognito(String name, final String email, final String password, String surname, String city, String address, String gender,String birthday){
+    public void signUpWithCognito(final Customer newCustomer, final String password){
         // Create a CognitoUserAttributes object and add user attributes
         final CognitoUserAttributes userAttributes = new CognitoUserAttributes();
 // Add the user attributes. Attributes are added as key-value pairs
-        userAttributes.addAttribute("name", name);
-        userAttributes.addAttribute("email", email);
-        userAttributes.addAttribute("family_name", surname);
-        userAttributes.addAttribute("locale", city);
-        userAttributes.addAttribute("address", address);
-        userAttributes.addAttribute("gender", gender);
-        userAttributes.addAttribute("birthdate",birthday);
+        userAttributes.addAttribute("name", newCustomer.getName());
+        userAttributes.addAttribute("email", newCustomer.getEmail());
+        userAttributes.addAttribute("family_name", newCustomer.getSurname());
+        userAttributes.addAttribute("locale", newCustomer.getCity());
+        userAttributes.addAttribute("address", newCustomer.getAddress());
+        userAttributes.addAttribute("gender", newCustomer.getGender());
+        userAttributes.addAttribute("birthdate",newCustomer.getBirthdate());
         SignUpHandler signupCallback = new SignUpHandler() {
             @Override
             public void onSuccess(final CognitoUser cognitoUser, boolean userConfirmed, CognitoUserCodeDeliveryDetails cognitoUserCodeDeliveryDetails) {
@@ -228,13 +230,13 @@ public class SignupActivity extends Activity {
                                     // depending on success
                                     // onSignupFailed();
                                     progressDialog.dismiss();
-                                    onSignupSuccess(email,password);
+                                    onSignupSuccess(newCustomer.getEmail(),password);
 
                                 }
                             }, 2000);
                 }
                 else {
-                    onSignupSuccess(email, password,true);
+                    onSignupSuccess(newCustomer.getEmail(), password,true);
                 }
             }
 
@@ -245,7 +247,7 @@ public class SignupActivity extends Activity {
                 onSignupFailed(exception);
             }
         };
-        userPool.signUpInBackground(email,password, userAttributes, null,signupCallback);
+        userPool.signUpInBackground(newCustomer.getEmail(),password, userAttributes, null,signupCallback);
     }
 
     public void updateBirthdayLabel(){
@@ -307,7 +309,7 @@ public class SignupActivity extends Activity {
         alertDialog.show();
     }
 
-    public boolean validate() {
+    public boolean validateFields() {
         boolean valid = true;
 
         String name = nameText.getText().toString();

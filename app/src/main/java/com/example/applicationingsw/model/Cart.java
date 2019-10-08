@@ -26,7 +26,6 @@ import java.util.List;
 public class Cart {
     private static Cart instance;
     private int cartID = -1;
-    private boolean isValid = false;
     private static String cartIDEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart";
 
 
@@ -65,18 +64,6 @@ public class Cart {
 
     public List<Pair<Item,Integer>> getItemsInCart(){
         return itemsInCart;
-    }
-
-    public void deleteItemFromCart(Item anItem){
-        Integer relatedQuantity = null;
-        for (Pair itemsInCart : itemsInCart){
-            if(itemsInCart.first.equals(anItem)){
-                relatedQuantity = (Integer) itemsInCart.second;
-            }
-        }
-        if(relatedQuantity!=null){
-            itemsInCart.remove(Pair.create(anItem, relatedQuantity));
-        }
     }
 
     public float calculateTotalPrice(){
@@ -194,47 +181,3 @@ public class Cart {
         this.cartID = cartID;
     }
 }
-
-/*
-
-        final JsonObjectRequest request = new JsonObjectRequest(endpoint, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONObject cartID = response.getJSONObject("cartID");
-                    if(cartID.getInt("cartID") != -1){
-                        setCartID(cartID.getInt("cartID"));
-                    }
-                } catch (JSONException e) {
-                    Log.e("PORCA xception",e.getLocalizedMessage());
-                }
-                catch (Exception e){
-                    Log.e("PORCA MADO",e.toString(),e);
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                setCartID(-1);
-            }
-        });
- */
-
-/*
-utilizzo
-public void testCart(){
-        Cart cart = Cart.getInstance();
-        for(Item i : itemsList){
-            Log.e("AGGIUNGO","" + i.getName());
-            cart.addItemInCart(i, 1);
-        }
-        for(Pair<Item,Integer> coppia : cart.getPair()){
-            Log.e("VEDO COME è ORA: ", ""+coppia.first.toString() + coppia.second.toString());
-        }
-        Log.e("CANCELLO", itemsList.get(12).getName());
-        cart.deleteItemFromCart(itemsList.get(12));
-        for(Pair<Item,Integer> coppia : cart.getPair()){
-            Log.e("VEDO COME è dopo: ", ""+ coppia.first.toString() + coppia.second.toString());
-        }
-    }
- */

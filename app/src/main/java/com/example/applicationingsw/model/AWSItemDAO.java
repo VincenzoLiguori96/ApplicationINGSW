@@ -51,7 +51,6 @@ public class AWSItemDAO implements ItemDAO {
                             }
                         }
                         Item currentItem = new Item(id,name,manufacturer,price,description,quantity,imageUrl,category,tags);
-                        currentItem.setNew(new Random().nextBoolean());
                         networkOperationsListener.getResult(currentItem);
                     }
                     networkOperationsListener.onFinish();
@@ -106,7 +105,6 @@ public class AWSItemDAO implements ItemDAO {
                             }
                         }
                         Item currentItem = new Item(id,name,manufacturer,price,description,quantity,imageUrl,category,tags);
-                        currentItem.setNew(new Random().nextBoolean());
                         networkOperationsListener.getResult(currentItem);
                     }
                     networkOperationsListener.onFinish();

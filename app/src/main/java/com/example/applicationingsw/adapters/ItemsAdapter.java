@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
-    List<Item> mItems;
-    List<Item> filteredItems;
-    Context mContext;
+    private List<Item> mItems;
+    private List<Item> filteredItems;
+    private Context mContext;
     public static final int LOADING_ITEM = 0;
     public static final int PRODUCT_ITEM = 1;
-    int LoadingItemPos;
-    public boolean loading = false;
+    private int loadingItemPos;
+    private boolean loading = false;
     private ItemsAdapterListener listener;
 
 
@@ -39,18 +39,11 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
 
     }
 
-    public void changeAdapterData(List<Item> newItems){
-        this.mItems.clear();
-        this.filteredItems.clear();
-        this.mItems.addAll(newItems);
-        this.filteredItems.addAll(newItems);
-        this.notifyDataSetChanged();
-    }
 
     //method to add Items as soon as they fetched 
-    public void addItems(List<Item> Items) {
+    public void addItems(List<Item> items) {
         int lastPos = mItems.size();
-        this.mItems.addAll(Items);
+        this.mItems.addAll(items);
         notifyItemRangeInserted(lastPos, mItems.size());
     }
 
@@ -117,6 +110,11 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
 
     }
 
+    public boolean isLoading() {
+        return loading;
+    }
+
+
     public interface ItemsAdapterListener {
         void onItemSelected(Item item);
     }
@@ -175,8 +173,8 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
 
     //Holds view of Item with information
     private class ItemHolder extends RecyclerView.ViewHolder {
-        ImageView imageViewItemThumb;
-        TextView textViewItemName, textViewItemPrice, textViewAvailability;
+        protected ImageView imageViewItemThumb;
+        protected TextView textViewItemName, textViewItemPrice, textViewAvailability;
 
 
         public ItemHolder(View itemView) {
@@ -189,7 +187,7 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
         }
     }
 
-    //holds view of loading item 
+    //holds view of loading item
     private class LoadingHolder extends RecyclerView.ViewHolder {
         public LoadingHolder(View itemView) {
             super(itemView);
@@ -200,18 +198,17 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
     public void showLoading() {
         Item item = new Item();
         item.setLoading(true);
-        item.setNew(false);
         mItems.add(item);
-        LoadingItemPos = mItems.size();
+        loadingItemPos = mItems.size();
         notifyItemInserted(mItems.size());
         loading = true;
     }
 
     //method to hide loading 
     public void hideLoading() {
-        if (LoadingItemPos <= mItems.size()) {
-            mItems.remove(LoadingItemPos - 1);
-            notifyItemRemoved(LoadingItemPos);
+        if (loadingItemPos <= mItems.size()) {
+            mItems.remove(loadingItemPos - 1);
+            notifyItemRemoved(loadingItemPos);
             loading = false;
         }
     }

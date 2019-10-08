@@ -6,13 +6,12 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.widget.Button;
 
 import com.example.applicationingsw.R;
 import com.example.applicationingsw.adapters.CheckoutPageAdapter;
 import com.example.applicationingsw.model.Customer;
 
-public class CartActivity extends AppCompatActivity implements ShippingTabFragment.SendCustomer {
+public class CartActivity extends AppCompatActivity implements SendCustomer {
     private ViewPager viewPager;
     private CheckoutPageAdapter adapter;
     @Override
@@ -62,10 +61,6 @@ public class CartActivity extends AppCompatActivity implements ShippingTabFragme
         }
     }
 
-    public void updateData(Customer aCustomer) {
-        SummaryTabFragment f = (SummaryTabFragment) adapter.getItem(1);
-        f.displayShippingInfo(aCustomer);
-    }
 
     public void changeTab(int destinationTab){
         viewPager.setCurrentItem(destinationTab);

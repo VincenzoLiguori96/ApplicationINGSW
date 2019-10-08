@@ -182,7 +182,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         itemDAO.readItemsWithFilter(new NetworkOperationsListener(){
             @Override
             public void getResult(Object object) {
-                if(itemsAdapter.loading){
+                if(itemsAdapter.isLoading()){
                     itemsAdapter.hideLoading();
                 }
                 Item castedResult = (Item) object;
@@ -220,7 +220,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         itemDAO.readAllItems(new NetworkOperationsListener() {
             @Override
             public void getResult(Object object) {
-                if(itemsAdapter.loading){
+                if(itemsAdapter.isLoading()){
                     itemsAdapter.hideLoading();
                 }
                 Item castedResult = (Item) object;

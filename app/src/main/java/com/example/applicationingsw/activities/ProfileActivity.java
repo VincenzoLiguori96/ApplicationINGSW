@@ -59,7 +59,7 @@ public class ProfileActivity extends AppCompatActivity {
         ProfileActivity.this.startActivity(turnToLoginPage);
     }
 
-    public void change_pass(View view) {
+    public void changePassword(View view) {
         Intent changePassword = new Intent(this,ChangePasswordActivity.class);
         this.startActivity(changePassword);
     }

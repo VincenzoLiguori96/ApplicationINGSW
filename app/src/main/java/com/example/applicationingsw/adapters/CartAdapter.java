@@ -24,9 +24,9 @@ import java.util.Locale;
 
 public class CartAdapter extends BaseAdapter {
 
-    Context context;
+    private Context context;
 
-    Cart cart;
+    private Cart cart;
 
     public CartAdapter(Context context, Cart cart) {
 
@@ -34,16 +34,6 @@ public class CartAdapter extends BaseAdapter {
         this.context = context;
         this.cart = cart;
     }
-
-
-
-
-
-
-
-
-
-
 
     @Override
     public int getCount() {
@@ -94,19 +84,11 @@ public class CartAdapter extends BaseAdapter {
         return convertView;
     }
 
-
-
-
-
-
-
-
-
     private class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView image;
-        TextView title;
-        TextView quantity;
-        TextView price;
+        protected ImageView image;
+        protected TextView title;
+        protected TextView quantity;
+        protected TextView price;
         public ViewHolder(View itemView) {
             super(itemView);
         }

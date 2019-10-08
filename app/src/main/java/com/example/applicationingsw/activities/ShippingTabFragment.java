@@ -12,9 +12,7 @@ import android.widget.Toast;
 import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.Customer;
 
-/**
- * Created by apple on 18/03/16.
- */
+
 public class ShippingTabFragment extends Fragment {
     private TextView name;
     private TextView surname;
@@ -22,9 +20,8 @@ public class ShippingTabFragment extends Fragment {
     private TextView phoneNumber;
     private TextView address;
     private TextView city;
-    private TextView continueButton;
+    private TextView continueView;
     private View shippingTab;
-    private Customer currentCustomer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,8 +54,8 @@ public class ShippingTabFragment extends Fragment {
             });
         }
         address = shippingTab.findViewById(R.id.addressTextView);
-        continueButton = shippingTab.findViewById(R.id.continueToOrderButton);
-        continueButton.setOnClickListener(new View.OnClickListener() {
+        continueView = shippingTab.findViewById(R.id.continueToOrderButton);
+        continueView.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
                  continueButtonPressed();
@@ -70,7 +67,7 @@ public class ShippingTabFragment extends Fragment {
 
 
     public void continueButtonPressed(){
-        if(validate()){
+        if(validateFields()){
             Customer customer = new Customer(name.getText().toString(),surname.getText().toString(),address.getText().toString(),email.getText().toString(),"",city.getText().toString(),"");
             try {
                 SendCustomer customerToPaymentFragment = (SendCustomer) getActivity();
@@ -85,7 +82,7 @@ public class ShippingTabFragment extends Fragment {
     }
 
 
-    public boolean validate() {
+    public boolean validateFields() {
         boolean valid = true;
 
         String nameString = name.getText().toString();
@@ -139,9 +136,6 @@ public class ShippingTabFragment extends Fragment {
         }
     }
 
-    interface SendCustomer{
-        public void send(Customer aCustomer,int toPage);
-        public void updateData(Customer aCustomer);
-    }
+
 
 }

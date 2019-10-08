@@ -36,6 +36,7 @@ Customer {
         this.gender = gender;
         this.city = city;
         this.birthdate = birthdate;
+        id=-1;
     }
 
 
