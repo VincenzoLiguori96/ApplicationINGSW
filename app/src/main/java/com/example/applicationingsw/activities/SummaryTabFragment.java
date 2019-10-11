@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Currency;
 import android.os.Build;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
@@ -54,8 +56,10 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Observable;
+import java.util.Observer;
 
-public class SummaryTabFragment extends Fragment implements PaymentMethod {
+public class SummaryTabFragment extends Fragment implements PaymentMethod, Observer {
 
     private View summaryView;
     private TextView buyerName;
@@ -68,7 +72,6 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     private Customer currentCustomer;
     private CartAdapter baseAdapter;
     private ProgressDialog loadingDialog;
-    private ImageView clearCartIcon;
     private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
     private String invoiceEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/invoice";
     private String cancelOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/recoverorder";
@@ -80,7 +83,10 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         buyerAddress = summaryView.findViewById((R.id.buyerAddress));
         buyerName = summaryView.findViewById(R.id.buyerName);
         amount = summaryView.findViewById(R.id.amount);
-        clearCartIcon = summaryView.findViewById(R.id.clearCart);
+        if(!Cart.getInstance().isInSyncWithServer()){
+            loadingDialog = ProgressDialog.show(getActivity(), "",
+                    "We're loading your last cart. Please wait...", true);
+        }
         getUserData();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ Currency.getInstance(Locale.getDefault()).getSymbol());
@@ -88,6 +94,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         else{
             amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ "€");
         }
+        Cart.getInstance().addObserver(this);
         payButton = summaryView.findViewById(R.id.payButton);
         payButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,11 +117,16 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         baseAdapter = new CartAdapter(getActivity(), Cart.getInstance()) {
         };
         listview.setAdapter(baseAdapter);
-        clearCartIcon.setOnClickListener(new View.OnClickListener() {
+        listview.getAdapter().registerDataSetObserver(new DataSetObserver() {
             @Override
-            public void onClick(View view) {
-                Cart.getInstance().clearCart();
-                baseAdapter.notifyDataSetChanged();
+            public void onChanged() {
+                super.onChanged();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ Currency.getInstance(Locale.getDefault()).getSymbol());
+                }
+                else{
+                    amount.setText(String.valueOf(Cart.getInstance().calculateTotalPrice())+ "€");
+                }
             }
         });
         return  summaryView;
@@ -128,7 +140,9 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     @Override
     public void pay(float amount) {
         Log.e("PAGAMENTO","entro e procedo" + amount);
-        postOrderOnDB(postOrderEndpoint,amount);
+        //TODO aggiustare
+
+        // postOrderOnDB(postOrderEndpoint,amount);
     }
 
     public void proceedWithPayment(float amount){
@@ -197,11 +211,14 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
             Log.i("paymentExample", "The user canceled.");
-            cancelOrderOnDB(cancelOrderEndpoint);
+            //TODO aggiustare
+            //
+            // cancelOrderOnDB(cancelOrderEndpoint);
         }
         else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
-            cancelOrderOnDB(cancelOrderEndpoint);
-
+//TODO aggiustare
+            //
+            // cancelOrderOnDB(cancelOrderEndpoint);
         }
 
     }
@@ -260,8 +277,8 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         CognitoUserPoolShared.getInstance().getUserPool().getUser(curr.getUserId()).getDetailsInBackground(handler);
     }
 
-
-    public void postOrderOnDB(final String endpoint, final float amount){
+//TODO aggiustare
+   /* public void postOrderOnDB(final String endpoint, final float amount){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
             JSONObject jsonBody = Cart.getInstance().getCartAsJson();
             final String requestBody = jsonBody.toString();
@@ -372,8 +389,9 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
             requestQueue.add(stringRequest);
             requestQueue.start();
     }
-
-
+*/
+//TODO aggiustare
+    /*
     public void cancelOrderOnDB(final String endpoint){
         Log.e("CART ID",String.valueOf(Cart.getInstance().getCartID()));
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
@@ -424,7 +442,7 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
         requestQueue.add(stringRequest);
         requestQueue.start();
     }
-
+*/
 
     public void sendInvoice(String endpoint){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
@@ -533,4 +551,12 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod {
     }
 
 
+    @Override
+    public void update(Observable observable, Object o) {
+        if(loadingDialog.isShowing()){
+            loadingDialog.dismiss();
+        }
+        Log.e("SUMMARYTAB","NOTIFICATO");
+        baseAdapter.notifyDataSetChanged();
+    }
 }

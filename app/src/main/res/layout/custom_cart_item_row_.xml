@@ -16,28 +16,26 @@
             android:id="@+id/itemImageCheckout"
             android:layout_width="217px"
             android:layout_height="217px"
-            android:gravity="center"
-            />
+            android:gravity="center" />
 
 
         <LinearLayout
-            android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
-            android:paddingTop="11dp"
             android:paddingLeft="16dp"
-            >
+            android:paddingTop="11dp">
 
             <TextView
 
                 android:id="@+id/title"
-                android:maxLines="2"
-                android:textSize="16dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:maxLines="2"
+                android:text="Lemon peel Base ball"
                 android:textColor="@color/black"
-                android:text="Lemon peel Base ball"/>
+                android:textSize="16dp" />
 
 
             <TextView
@@ -51,36 +49,43 @@
 
             <TextView
                 android:id="@+id/itemquantity"
-                android:textSize="14dp"
-                android:textColor="@color/black"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="$ 250.00"
                 android:paddingTop="16dp"
-                />
+                android:text="$ 250.00"
+                android:textColor="@color/black"
+                android:textSize="14dp" />
 
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
             android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
             >
 
 
             <TextView
                 android:id="@+id/itemPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:text="01"
-                android:textSize="16dp"
+                android:layout_marginRight="10dp"
                 android:textColor="@color/black"
-                android:gravity="center"
-                />
+                android:textSize="16dp" />
+
+            <ImageView
+                android:id="@+id/deleteItem"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="right"
+                android:src="@drawable/ic_close_tag" />
 
             <!--<ImageView-->
             <!--android:id="@+id/min"-->
@@ -92,9 +97,6 @@
 
 
         </LinearLayout>
-
-
-
 
 
     </LinearLayout>

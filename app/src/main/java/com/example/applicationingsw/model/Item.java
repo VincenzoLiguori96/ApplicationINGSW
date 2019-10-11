@@ -6,6 +6,7 @@ import android.icu.util.Currency;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.example.applicationingsw.App;
 import com.example.applicationingsw.R;
@@ -72,12 +73,8 @@ public class Item implements Parcelable {
     }
     public String getPriceWithConcurrency() { return price;   }
     public float getPriceWithoutConcurrency(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return Float.valueOf(price.replaceAll(Currency.getInstance(Locale.getDefault()).getSymbol(),""));
-        }
-        else{
-            return Float.valueOf(price.replaceAll("€",""));
-        }
+        String priceWithoutConcurrency = price.replaceAll("[^\\d.]", "");
+        return Float.valueOf(priceWithoutConcurrency);
     }
     public String getDescription() {
         return description;

@@ -87,21 +87,10 @@
            android:layout_marginTop="30dp"
            android:orientation="horizontal">
            <TextView
-               android:layout_weight="1"
-               android:layout_marginTop="30dp"
                android:layout_width="match_parent"
-               android:layout_height="32dp">
+               android:layout_weight="1"
+               android:layout_height="wrap_content">
            </TextView>
-           <ImageView
-               android:id="@+id/clearCart"
-               android:layout_marginRight="16dp"
-               android:layout_width="32dp"
-               android:layout_height="32dp"
-               android:layout_gravity="right"
-               android:src="@drawable/ic_garbage"
-               android:background="@color/white"
-               >
-           </ImageView>
        </LinearLayout>
         <ListView
 

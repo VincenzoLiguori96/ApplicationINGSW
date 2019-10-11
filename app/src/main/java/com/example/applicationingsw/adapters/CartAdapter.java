@@ -51,7 +51,7 @@ public class CartAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder = null;
 
         if (convertView == null){
@@ -62,6 +62,15 @@ public class CartAdapter extends BaseAdapter {
             viewHolder.title = (TextView)convertView.findViewById(R.id.title);
             viewHolder.quantity = (TextView)convertView.findViewById(R.id.itemquantity);
             viewHolder.price = (TextView)convertView.findViewById(R.id.itemPrice);
+            viewHolder.delete = convertView.findViewById(R.id.deleteItem);
+            viewHolder.delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Pair<Item,Integer> i = (Pair<Item,Integer>) getItem(position);
+                    Cart.getInstance().deleteItemFromCart(i.first);
+                    notifyDataSetChanged();
+                }
+            });
             convertView.setTag(viewHolder);
 
         }else {
@@ -89,6 +98,7 @@ public class CartAdapter extends BaseAdapter {
         protected TextView title;
         protected TextView quantity;
         protected TextView price;
+        protected ImageView delete;
         public ViewHolder(View itemView) {
             super(itemView);
         }

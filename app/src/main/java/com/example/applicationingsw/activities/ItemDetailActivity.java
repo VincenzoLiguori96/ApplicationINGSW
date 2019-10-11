@@ -175,7 +175,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
             vibe.vibrate(100);
             Toast.makeText(getApplicationContext(),itemToAdd.getName() + " added", Toast.LENGTH_SHORT).show();
             int quantity = Integer.valueOf(quantityTextView.getText().toString());
-            Cart.getInstance().addItemInCart(itemToAdd,quantity);
+            Cart.getInstance().addItemInCart(itemToAdd,quantity,false);
         }
         else {
             new AlertDialog.Builder(this)

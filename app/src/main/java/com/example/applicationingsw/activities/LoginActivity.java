@@ -24,6 +24,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Chal
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.example.applicationingsw.R;
+import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 
 public class LoginActivity extends Activity {
@@ -119,6 +120,7 @@ public class LoginActivity extends Activity {
             public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {
                 progressDialog.dismiss();
                 Intent myIntent = new Intent(LoginActivity.this, DashboardActivity.class);
+                Cart.getInstance().getCartIDFromAPI(Cart.getGetLastCartEndpoint());
                 LoginActivity.this.startActivity(myIntent);
                 LoginActivity.this.finish();
             }

@@ -33,7 +33,7 @@ public class LaunchActivity extends AppCompatActivity {
     }
 
     public void initializeCart(){
-        Cart.getInstance().getCartIDFromAPI("https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/getcart");
+        Cart.getInstance();
     }
 
     public void decideStartingActivity(){
