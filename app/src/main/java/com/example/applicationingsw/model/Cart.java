@@ -166,13 +166,17 @@ public class Cart extends Observable {
                             inSyncWithServer = true;
                             setChanged();
                             notifyObservers();
-                            setCartID(-1);
                         }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        getCartIDFromAPI(getLastCartEndpoint);
-                        Log.e("CARTcazzo",e.getLocalizedMessage());
+                        if(e.getMessage().contains("No value for items")){
+                            inSyncWithServer = true;
+                            Log.e("0 articoli nel carrello",e.getMessage());
+                        }
+                        else{
+                            getCartIDFromAPI(getLastCartEndpoint);
+                        }
                     }
 
                 }
@@ -184,7 +188,6 @@ public class Cart extends Observable {
                     setChanged();
                     notifyObservers();
                     Log.e("CART","Errore" + error.toString()+ error.getLocalizedMessage());
-                    //getCartIDFromAPI(getLastCartEndpoint);
                 }
             }) {
                 @Override
@@ -274,7 +277,8 @@ public class Cart extends Observable {
                         JSONObject responseBody = new JSONObject(response);
                         boolean success = responseBody.getBoolean("success");
                         if(!success){
-                            new AlertDialog.Builder(App.getAppContext())
+                            //TODO problema
+                            /*new AlertDialog.Builder(App.getAppContext())
                                     .setTitle("We're running some issues.")
                                     .setMessage("Please retry.")
                                     .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -284,7 +288,7 @@ public class Cart extends Observable {
                                         }
                                     })
                                     .setIcon(android.R.drawable.ic_dialog_alert)
-                                    .show();
+                                    .show();*/
                             Log.e("CART",responseBody.getString("errorInfo"));
                         }
 

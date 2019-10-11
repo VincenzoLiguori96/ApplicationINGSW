@@ -54,7 +54,6 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         Intent intent = getIntent();
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         currentItem = intent.getParcelableExtra("CurrentItem");
-        //TODO creare una classe statica in cui mettere questi metodi di inizializzazione del menu a toolbar?
         menuImageView = findViewById(R.id.leftMenuImage);
         menuImageView.setOnClickListener(new View.OnClickListener() {
             @Override

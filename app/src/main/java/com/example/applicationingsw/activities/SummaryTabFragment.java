@@ -29,6 +29,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
@@ -53,6 +54,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -74,7 +76,6 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
     private ProgressDialog loadingDialog;
     private String postOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/postorder";
     private String invoiceEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/invoice";
-    private String cancelOrderEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/recoverorder";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -99,8 +100,6 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
         payButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadingDialog = ProgressDialog.show(getActivity(), "",
-                        "I'm processing the payment. Please wait...", true);
                 Cart.getInstance().pay(SummaryTabFragment.this);
             }
         });
@@ -139,14 +138,10 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
      */
     @Override
     public void pay(float amount) {
-        Log.e("PAGAMENTO","entro e procedo" + amount);
-        //TODO aggiustare
-
-        // postOrderOnDB(postOrderEndpoint,amount);
+        checkAvailabilityForOrder();
     }
 
     public void proceedWithPayment(float amount){
-        loadingDialog.dismiss();
         if(amount>0){
             String description = "" ;
             for(Pair<Item,Integer> itemInCart : Cart.getInstance().getItemsInCart()){
@@ -196,7 +191,10 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
         if (resultCode == Activity.RESULT_OK) {
             PaymentConfirmation confirm = data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
+                postOrderOnDB(postOrderEndpoint);
                 sendInvoice(invoiceEndpoint);
+                Cart.getInstance().clearCart();
+                baseAdapter.notifyDataSetChanged();
                 new AlertDialog.Builder(getContext())
                         .setTitle("Purchase done")
                         .setMessage("The order is completed! Check your inbox for the invoice and continue shopping!")
@@ -210,15 +208,10 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
             }
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
-            Log.i("paymentExample", "The user canceled.");
-            //TODO aggiustare
-            //
-            // cancelOrderOnDB(cancelOrderEndpoint);
+            Log.e("ERRORE PAYPAL", "result canceled");
         }
         else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
-//TODO aggiustare
-            //
-            // cancelOrderOnDB(cancelOrderEndpoint);
+            Log.e("ERRORE PAYPAL", "result extras invalid");
         }
 
     }
@@ -277,91 +270,47 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
         CognitoUserPoolShared.getInstance().getUserPool().getUser(curr.getUserId()).getDetailsInBackground(handler);
     }
 
-//TODO aggiustare
-   /* public void postOrderOnDB(final String endpoint, final float amount){
+    public void checkAvailabilityForOrder(){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
-            JSONObject jsonBody = Cart.getInstance().getCartAsJson();
+        try {
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("cart", Cart.getInstance().getCartID());
+            jsonBody.put("checkAvailability", true);
             final String requestBody = jsonBody.toString();
-            Log.e("BODU ORDER:",requestBody);
-            final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
+            final StringRequest stringRequest = new StringRequest(Request.Method.POST, postOrderEndpoint, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
+                        Log.e("Response",response);
                         JSONObject responseBody = new JSONObject(response);
-                        boolean isAuthorized = responseBody.getBoolean("success");
-                        Log.e("RISULTATO POST ORDER",responseBody.toString());
-                        if(!isAuthorized){
-                            JSONObject errorReport = responseBody.getJSONObject("errorReport");
-                            int errorCode = errorReport.getInt("errorCode");
-                            if(errorCode == 23514){
-                                loadingDialog.dismiss();
+                        if(!responseBody.getBoolean("success")){
+                            if(responseBody.getJSONObject("errorReport").getInt("errorCode") == 23514){
                                 new AlertDialog.Builder(getContext())
-                                        .setTitle("Items not available")
-                                        .setMessage("We're sorry but one or more items are not available anymore. Try to reduce your quantity or wait until they will be newly available.")
-                                        .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                Cart.getInstance().clearCart();
-                                                cancelOrderOnDB(cancelOrderEndpoint);
-                                                baseAdapter.notifyDataSetChanged();
+                                        .setTitle("Items unavailable")
+                                        .setMessage("We're sorry but some items are not available. Try to reduce your quantity.")
+                                        .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                getActivity().finish();
                                             }
                                         })
                                         .setIcon(android.R.drawable.ic_dialog_alert)
                                         .show();
                             }
-                            else{
-                                retriesCount++;
-                                if(retriesCount < 10){
-                                    postOrderOnDB(endpoint,amount);
-                                }
-                                else{
-                                    retriesCount = 0;
-                                    loadingDialog.dismiss();
-                                    new AlertDialog.Builder(getContext())
-                                            .setTitle("Purchase not available")
-                                            .setMessage("We're sorry but something went wrong with your purchase. Please retry.")
-                                            .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    cancelOrderOnDB(cancelOrderEndpoint);
-                                                    Cart.getInstance().clearCart();
-                                                    SummaryTabFragment.this.getActivity().finish();
-                                                }
-                                            })
-                                            .setIcon(android.R.drawable.ic_dialog_alert)
-                                            .show();
-                                }
-                            }
                         }
                         else{
-                            proceedWithPayment(amount);
+                            proceedWithPayment(Cart.getInstance().calculateTotalPrice());
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        Log.e("Exception",e.getLocalizedMessage());
                     }
 
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    retriesCount++;
-                    if(retriesCount < 10){
-                        postOrderOnDB(endpoint,amount);
-                    }
-                    else{
-                        retriesCount = 0;
-                        loadingDialog.dismiss();
-                        new AlertDialog.Builder(getContext())
-                                .setTitle("Purchase not available")
-                                .setMessage("We're sorry but something went wrong with your purchase. Please retry.")
-                                .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        cancelOrderOnDB(cancelOrderEndpoint);
-                                    }
-                                })
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .show();
-                        Cart.getInstance().clearCart();
-                        SummaryTabFragment.this.getActivity().finish();
-                    }
+                    Log.e("Postorder","Errore" + error.toString()+ error.getLocalizedMessage());
                 }
             }) {
                 @Override
@@ -386,63 +335,105 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
                     return super.parseNetworkResponse(response);
                 }
             };
+            stringRequest.setRetryPolicy(new RetryPolicy() {
+                @Override
+                public int getCurrentTimeout() {
+                    return 25000;
+                }
+
+                @Override
+                public int getCurrentRetryCount() {
+                    return 10;
+                }
+
+                @Override
+                public void retry(VolleyError error) throws VolleyError {
+                    Log.e("CART","RETRY" + error.getMessage());
+                }
+            });
             requestQueue.add(stringRequest);
             requestQueue.start();
+
+        } catch (JSONException e) {
+            checkAvailabilityForOrder();
+        }
     }
-*/
-//TODO aggiustare
-    /*
-    public void cancelOrderOnDB(final String endpoint){
-        Log.e("CART ID",String.valueOf(Cart.getInstance().getCartID()));
-        final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
-        JSONObject jsonBody = Cart.getInstance().getCartAsJson();
-        final String requestBody = jsonBody.toString();
-        final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    JSONObject responseBody = new JSONObject(response);
-                    boolean result = responseBody.getBoolean("success");
-                    if(!result){
-                        cancelOrderOnDB(endpoint);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
 
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                cancelOrderOnDB(endpoint);
-            }
-        }) {
-            @Override
-            public String getBodyContentType() {
-                return "application/json; charset=utf-8";
-            }
+   public void postOrderOnDB(final String endpoint){
+       final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
+       try {
+           JSONObject jsonBody = new JSONObject();
+           jsonBody.put("cart", Cart.getInstance().getCartID());
+           jsonBody.put("checkAvailability", false);
+           final String requestBody = jsonBody.toString();
+           final StringRequest stringRequest = new StringRequest(Request.Method.POST, endpoint, new Response.Listener<String>() {
+               @Override
+               public void onResponse(String response) {
+                   try {
+                       Log.e("Response",response);
+                       JSONObject responseBody = new JSONObject(response);
+                       if(!responseBody.getBoolean("success")){
+                           if(responseBody.getJSONObject("errorReport").getInt("errorCode") == 23514){
+                               Log.e("Postorderondb","articoli non sufficienti");
+                           }
+                       }
+                   } catch (JSONException e) {
+                       e.printStackTrace();
+                       Log.e("Exception",e.getLocalizedMessage());
+                   }
 
-            @Override
-            public byte[] getBody() throws AuthFailureError {
-                try {
-                    Log.i("BODY", requestBody);
-                    return requestBody == null ? null : requestBody.getBytes("utf-8");
-                } catch (UnsupportedEncodingException uee) {
-                    VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
-                    return null;
-                }
-            }
+               }
+           }, new Response.ErrorListener() {
+               @Override
+               public void onErrorResponse(VolleyError error) {
+                   Log.e("Postorder","Errore" + error.toString()+ error.getLocalizedMessage());
+               }
+           }) {
+               @Override
+               public String getBodyContentType() {
+                   return "application/json; charset=utf-8";
+               }
+
+               @Override
+               public byte[] getBody() throws AuthFailureError {
+                   try {
+                       Log.i("BODY", requestBody);
+                       return requestBody == null ? null : requestBody.getBytes("utf-8");
+                   } catch (UnsupportedEncodingException uee) {
+                       VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                       return null;
+                   }
+               }
 
 
-            @Override
-            protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                return super.parseNetworkResponse(response);
-            }
-        };
-        requestQueue.add(stringRequest);
-        requestQueue.start();
+               @Override
+               protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                   return super.parseNetworkResponse(response);
+               }
+           };
+           stringRequest.setRetryPolicy(new RetryPolicy() {
+               @Override
+               public int getCurrentTimeout() {
+                   return 25000;
+               }
+
+               @Override
+               public int getCurrentRetryCount() {
+                   return 10;
+               }
+
+               @Override
+               public void retry(VolleyError error) throws VolleyError {
+                   Log.e("CART","RETRY" + error.getMessage());
+               }
+           });
+           requestQueue.add(stringRequest);
+           requestQueue.start();
+
+       } catch (JSONException e) {
+           postOrderOnDB(postOrderEndpoint);
+       }
     }
-*/
 
     public void sendInvoice(String endpoint){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
@@ -459,8 +450,6 @@ public class SummaryTabFragment extends Fragment implements PaymentMethod, Obser
                     if(!result){
                         sendInvoice(invoiceEndpoint);
                     }
-                    Cart.getInstance().clearCart();
-                    baseAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

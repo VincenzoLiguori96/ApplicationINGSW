@@ -81,7 +81,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             }
         });
         setSearchManager();
-        //TODO creare una classe statica in cui mettere questi metodi di inizializzazione del menu a toolbar?
         menuImageView = findViewById(R.id.leftMenuImage);
         menuImageView.setOnClickListener(new View.OnClickListener() {
             @Override
