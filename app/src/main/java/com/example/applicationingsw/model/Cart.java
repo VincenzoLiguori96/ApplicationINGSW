@@ -277,18 +277,6 @@ public class Cart extends Observable {
                         JSONObject responseBody = new JSONObject(response);
                         boolean success = responseBody.getBoolean("success");
                         if(!success){
-                            //TODO problema
-                            /*new AlertDialog.Builder(App.getAppContext())
-                                    .setTitle("We're running some issues.")
-                                    .setMessage("Please retry.")
-                                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                                        }
-                                    })
-                                    .setIcon(android.R.drawable.ic_dialog_alert)
-                                    .show();*/
                             Log.e("CART",responseBody.getString("errorInfo"));
                         }
 
