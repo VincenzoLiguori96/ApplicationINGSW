@@ -14,9 +14,25 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.applicationingsw.App;
 import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
 import com.example.applicationingsw.model.Customer;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -30,6 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView profileAddress;
     private TextView profileCity;
     private Customer currentCustomer;
+    private String deleteCustomerEndpoint = "https://6vqj00iw10.execute-api.eu-west-1.amazonaws.com/E-Commerce-Production/deletecustomer";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,13 +77,15 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void deleteCustomer(View view) {
+        final String email = CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().getUserId();
+        Log.e("utente", CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().getUserId());
         GenericHandler handler = new GenericHandler() {
-
             @Override
             public void onSuccess() {
+                deleteCustomerOnDB(email);
                 new AlertDialog.Builder(ProfileActivity.this)
                         .setTitle("Goodbye!")
-                        .setMessage("We're sorry you deleted your account. You can come back when you want!")
+                        .setMessage("We're sorry you deleted your account. You can come back whenever you want!")
                         .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent turnToLoginPage = new Intent(ProfileActivity.this,LoginActivity.class);
@@ -94,6 +113,79 @@ public class ProfileActivity extends AppCompatActivity {
                         .show();
             }
         };
+        CognitoUserPoolShared.getInstance().getUserPool().getCurrentUser().deleteUserInBackground(handler);
+    }
+
+
+    public void deleteCustomerOnDB(final String email){
+        final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());
+        try {
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("email", email);
+            final String requestBody = jsonBody.toString();
+            final StringRequest stringRequest = new StringRequest(Request.Method.POST, deleteCustomerEndpoint, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        Log.e("Response",response);
+                        JSONObject responseBody = new JSONObject(response);
+                        boolean success = responseBody.getBoolean("success");
+
+                    } catch (JSONException e) {
+                        Log.e("Profile delete customer", e.getLocalizedMessage());
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    deleteCustomerOnDB(email);
+                    Log.e("PROFACT_DELETE","Errore" + error.toString()+ error.getLocalizedMessage());
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        Log.i("BODY", requestBody);
+                        return requestBody == null ? null : requestBody.getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                        return null;
+                    }
+                }
+
+
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    return super.parseNetworkResponse(response);
+                }
+            };
+            stringRequest.setRetryPolicy(new RetryPolicy() {
+                @Override
+                public int getCurrentTimeout() {
+                    return 25000;
+                }
+
+                @Override
+                public int getCurrentRetryCount() {
+                    return 50;
+                }
+
+                @Override
+                public void retry(VolleyError error) throws VolleyError {
+                }
+            });
+            requestQueue.add(stringRequest);
+            requestQueue.start();
+
+        } catch (JSONException e) {
+            deleteCustomerOnDB(email);
+        }
     }
 
 

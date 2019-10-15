@@ -363,6 +363,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void goToCart(){
-        CartAccessService.goToCart(getApplicationContext(),this);
+        CartAccessService.goToCart(this, DashboardActivity.this);
     }
 }
