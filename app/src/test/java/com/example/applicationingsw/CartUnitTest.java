@@ -1,8 +1,6 @@
 package com.example.applicationingsw;
 
 
-import android.support.v4.util.Pair;
-
 import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.Item;
 
@@ -88,14 +86,10 @@ public class CartUnitTest {
         c.addItemInCart(third, 1,true);
         c.addItemInCart(fourth, 3,true);
         c.addItemInCart(fifth, 2,true);
-        System.out.println("\n\n\n\n\n\nPrezzo del sesto: "+sixth.getPriceWithConcurrency());
         c.addItemInCart(sixth, 15,true);
         c.addItemInCart(seventh, 9,true);
         c.addItemInCart(eighth, 2,true);
         c.addItemInCart(ninth, 102,true);
-        for(Pair<Item,Integer> i : c.getInstance().getItemsInCart()){
-            System.out.println(i.first.toString() + i.second);
-        }
         assertEquals(732.02f,c.calculateTotalPrice(),0.009);
     }
 

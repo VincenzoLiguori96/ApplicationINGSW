@@ -88,9 +88,7 @@ public class Cart extends Observable {
     public float calculateTotalPrice(){
         float amount = 0;
         for(Pair<Item,Integer> itemInCart : itemsInCart){
-            System.out.println("Prima: "+itemInCart.first + " quantità"+ itemInCart.second+ " prezzo: " +itemInCart.first.getPriceWithoutConcurrency() + " totale: "+ amount);
             amount = amount + (itemInCart.first.getPriceWithoutConcurrency() * itemInCart.second);
-            System.out.println("Dopo: " + amount);
         }
         return amount;
     }

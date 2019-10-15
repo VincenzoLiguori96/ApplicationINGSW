@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -69,7 +70,6 @@ public class Item implements Parcelable {
     public String getPriceWithConcurrency() { return price;   }
     public float getPriceWithoutConcurrency(){
         String priceWithoutConcurrency = price.replaceAll("[^\\d.]", "");
-        System.out.println("Without concurrency: " + priceWithoutConcurrency);
         return Float.valueOf(priceWithoutConcurrency);
     }
     public String getDescription() {
@@ -114,12 +114,13 @@ public class Item implements Parcelable {
     public Item(int anId, String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory,List<String>tagsList) {
         id = (anId);
         name =  (aName);
-        System.out.println("prezzo nel costruttore:" + aPrice);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            this.price = aPrice + Currency.getInstance(Locale.getDefault()).getSymbol();
+            BigDecimal decimal = new BigDecimal(aPrice);
+            this.price = decimal.toPlainString() + Currency.getInstance(Locale.getDefault()).getSymbol();
         }
         else{
-            this.price = aPrice + "€";
+            BigDecimal decimal = new BigDecimal(aPrice);
+            this.price = decimal.toPlainString() + "€";
         }
         manufacturer =  (aManufacturer);
         description =  (aDescription);
@@ -131,12 +132,13 @@ public class Item implements Parcelable {
 
     public Item( String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory) {
         name =  (aName);
-        System.out.println("prezzo nel costruttore:" + aPrice);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            this.price = aPrice + Currency.getInstance(Locale.getDefault()).getSymbol();
+            BigDecimal decimal = new BigDecimal(aPrice);
+            this.price = decimal.toPlainString() + Currency.getInstance(Locale.getDefault()).getSymbol();
         }
         else{
-            this.price = aPrice + "€";
+            BigDecimal decimal = new BigDecimal(aPrice);
+            this.price = decimal.toPlainString() + "€";
         }
         manufacturer =  (aManufacturer);
         description =  (aDescription);

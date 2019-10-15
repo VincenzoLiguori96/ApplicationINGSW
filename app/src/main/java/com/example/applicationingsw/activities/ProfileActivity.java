@@ -1,7 +1,6 @@
 package com.example.applicationingsw.activities;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.widget.TextView;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.example.applicationingsw.R;
 import com.example.applicationingsw.model.CognitoUserPoolShared;
@@ -58,6 +58,44 @@ public class ProfileActivity extends AppCompatActivity {
         turnToLoginPage.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         ProfileActivity.this.startActivity(turnToLoginPage);
     }
+
+    public void deleteCustomer(View view) {
+        GenericHandler handler = new GenericHandler() {
+
+            @Override
+            public void onSuccess() {
+                new AlertDialog.Builder(ProfileActivity.this)
+                        .setTitle("Goodbye!")
+                        .setMessage("We're sorry you deleted your account. You can come back when you want!")
+                        .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent turnToLoginPage = new Intent(ProfileActivity.this,LoginActivity.class);
+                                turnToLoginPage.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                ProfileActivity.this.startActivity(turnToLoginPage);
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                new AlertDialog.Builder(ProfileActivity.this)
+                        .setTitle("Error deleting profile!")
+                        .setMessage("We're sorry but we can't delete your account now. Please, try again. Error details: " + exception.getLocalizedMessage())
+                        .setPositiveButton("Ok!", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent turnToLoginPage = new Intent(ProfileActivity.this,LoginActivity.class);
+                                turnToLoginPage.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                ProfileActivity.this.startActivity(turnToLoginPage);
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
+        };
+    }
+
 
     public void changePassword(View view) {
         Intent changePassword = new Intent(this,ChangePasswordActivity.class);
