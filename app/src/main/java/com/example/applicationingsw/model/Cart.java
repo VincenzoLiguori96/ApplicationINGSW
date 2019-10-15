@@ -48,7 +48,6 @@ public class Cart extends Observable {
      * The private constructor for the CartSingleton class
      */
     private Cart() {
-        getCartIDFromAPI(getLastCartEndpoint);
     }
 
     public static synchronized Cart getInstance() {
@@ -89,7 +88,9 @@ public class Cart extends Observable {
     public float calculateTotalPrice(){
         float amount = 0;
         for(Pair<Item,Integer> itemInCart : itemsInCart){
+            System.out.println("Prima: "+itemInCart.first + " quantità"+ itemInCart.second+ " prezzo: " +itemInCart.first.getPriceWithoutConcurrency() + " totale: "+ amount);
             amount = amount + (itemInCart.first.getPriceWithoutConcurrency() * itemInCart.second);
+            System.out.println("Dopo: " + amount);
         }
         return amount;
     }
@@ -239,28 +240,6 @@ public class Cart extends Observable {
     public void clearCart(){
         itemsInCart.clear();
     }
-
-   /* public JSONObject getCartAsJson(){
-        JSONObject jsonBody = new JSONObject();
-        try {
-            JSONArray arrayOfItems = new JSONArray();
-            JSONObject singleItem = new JSONObject();
-            for(Pair<Item,Integer>itemInCart : itemsInCart){
-                singleItem.put("id", itemInCart.first.getId());
-                singleItem.put("quantity", itemInCart.second);
-                arrayOfItems.put(singleItem);
-                singleItem = new JSONObject();
-            }
-            jsonBody.put("items", arrayOfItems);
-            if(getCartID() == -1){
-                getCartIDFromAPI(cartIDEndpoint);
-            }
-            jsonBody.put("cart", getCartID());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonBody;
-    }*/
 
     public void postItemOnServer(final Pair<Item,Integer> toAdd){
         final RequestQueue requestQueue = Volley.newRequestQueue(App.getAppContext());

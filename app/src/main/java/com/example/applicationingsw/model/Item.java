@@ -1,15 +1,10 @@
 package com.example.applicationingsw.model;
 
 
-import android.content.res.Resources;
 import android.icu.util.Currency;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
-
-import com.example.applicationingsw.App;
-import com.example.applicationingsw.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +69,7 @@ public class Item implements Parcelable {
     public String getPriceWithConcurrency() { return price;   }
     public float getPriceWithoutConcurrency(){
         String priceWithoutConcurrency = price.replaceAll("[^\\d.]", "");
+        System.out.println("Without concurrency: " + priceWithoutConcurrency);
         return Float.valueOf(priceWithoutConcurrency);
     }
     public String getDescription() {
@@ -118,6 +114,7 @@ public class Item implements Parcelable {
     public Item(int anId, String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory,List<String>tagsList) {
         id = (anId);
         name =  (aName);
+        System.out.println("prezzo nel costruttore:" + aPrice);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             this.price = aPrice + Currency.getInstance(Locale.getDefault()).getSymbol();
         }
@@ -134,6 +131,7 @@ public class Item implements Parcelable {
 
     public Item( String aName, String aManufacturer, float aPrice, String aDescription, int aQuantity,String anUrl,String aCategory) {
         name =  (aName);
+        System.out.println("prezzo nel costruttore:" + aPrice);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             this.price = aPrice + Currency.getInstance(Locale.getDefault()).getSymbol();
         }

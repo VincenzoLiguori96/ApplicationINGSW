@@ -1,18 +1,18 @@
 package com.example.applicationingsw;
 
 
+import android.support.v4.util.Pair;
+
 import com.example.applicationingsw.model.Cart;
 import com.example.applicationingsw.model.Item;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -42,17 +42,17 @@ public class CartUnitTest {
         Cart c = Cart.getInstance();
         c.clearCart();
         assertEquals(0,c.getItemsInCart().size());
-        c.addItemInCart(first,1);
-        c.addItemInCart(second, 2);
-        c.addItemInCart(third, 1);
-        c.addItemInCart(fourth, 3);
-        c.addItemInCart(fifth, 2);
-        c.addItemInCart(sixth, 15);
-        c.addItemInCart(seventh, 9);
-        c.addItemInCart(eighth, 2);
-        c.addItemInCart(ninth, 102);
+        c.addItemInCart(first,1,true);
+        c.addItemInCart(second, 2,true);
+        c.addItemInCart(third, 1,true);
+        c.addItemInCart(fourth, 3,true);
+        c.addItemInCart(fifth, 2,true);
+        c.addItemInCart(sixth, 15,true);
+        c.addItemInCart(seventh, 9,true);
+        c.addItemInCart(eighth, 2,true);
+        c.addItemInCart(ninth, 102,true);
         c.clearCart();
-        assertEquals(0, c.getItemsInCart().size());
+        assertTrue(c.getItemsInCart().size() == 0);
     }
 
     /**
@@ -63,15 +63,15 @@ public class CartUnitTest {
     public void addItemTest(){
         Cart c = Cart.getInstance();
         c.clearCart();
-        c.addItemInCart(first,1);
-        c.addItemInCart(second, 2);
-        c.addItemInCart(third, 1);
-        c.addItemInCart(fourth, 3);
-        c.addItemInCart(fifth, 2);
-        c.addItemInCart(sixth, 15);
-        c.addItemInCart(seventh, 9);
-        c.addItemInCart(eighth, 2);
-        c.addItemInCart(ninth, 102);
+        c.addItemInCart(first,1,true);
+        c.addItemInCart(second, 2,true);
+        c.addItemInCart(third, 1,true);
+        c.addItemInCart(fourth, 3,true);
+        c.addItemInCart(fifth, 2,true);
+        c.addItemInCart(sixth, 15,true);
+        c.addItemInCart(seventh, 9,true);
+        c.addItemInCart(eighth, 2,true);
+        c.addItemInCart(ninth, 102,true);
         assertEquals(9, c.getItemsInCart().size());
     }
 
@@ -83,55 +83,20 @@ public class CartUnitTest {
     public void calculateTotalPriceOfItemsInCartTest(){
         Cart c = Cart.getInstance();
         c.clearCart();
-        c.addItemInCart(first,1);
-        c.addItemInCart(second, 2);
-        c.addItemInCart(third, 1);
-        c.addItemInCart(fourth, 3);
-        c.addItemInCart(fifth, 2);
-        c.addItemInCart(sixth, 15);
-        c.addItemInCart(seventh, 9);
-        c.addItemInCart(eighth, 2);
-        c.addItemInCart(ninth, 102);
+        c.addItemInCart(first,1,true);
+        c.addItemInCart(second, 2,true);
+        c.addItemInCart(third, 1,true);
+        c.addItemInCart(fourth, 3,true);
+        c.addItemInCart(fifth, 2,true);
+        System.out.println("\n\n\n\n\n\nPrezzo del sesto: "+sixth.getPriceWithConcurrency());
+        c.addItemInCart(sixth, 15,true);
+        c.addItemInCart(seventh, 9,true);
+        c.addItemInCart(eighth, 2,true);
+        c.addItemInCart(ninth, 102,true);
+        for(Pair<Item,Integer> i : c.getInstance().getItemsInCart()){
+            System.out.println(i.first.toString() + i.second);
+        }
         assertEquals(732.02f,c.calculateTotalPrice(),0.009);
-    }
-
-    /**
-     * This test create some fake items and add them in the cart and then check the equality of the result of the transformation of the cart in Json done by the getCartAsJson method with the precompiled correct JSON strings.
-     */
-    @Test
-    public void testGetCartAsJsonRespectPrefixedStructure(){
-        String correctJsonSimple = "{\"items\":[],\"cart\":1}";
-        String correctJsonIntermediate = "{\"items\":[{\"quantity\":1,\"id\":1}],\"cart\":1}";
-        String correctJsonComplex = "{\"items\":[{\"quantity\":1,\"id\":1},{\"quantity\":3,\"id\":2}],\"cart\":1}";
-        Cart c = Cart.getInstance();
-        c.setCartID(1);
-        c.clearCart();
-        c.addItemInCart(first,1);
-        c.addItemInCart(second, 3);
-        JSONObject cartAsJSON = c.getCartAsJson();
-        try {
-            String cartAsJsonString = cartAsJSON.toString(0);
-            assertEquals(correctJsonComplex, cartAsJsonString);
-        } catch (JSONException e) {
-            fail();
-        }
-        c.clearCart();
-        try {
-            cartAsJSON = c.getCartAsJson();
-            String cartAsJsonString = cartAsJSON.toString(0);
-            assertEquals(correctJsonSimple, cartAsJsonString);
-        } catch (JSONException e) {
-            fail();
-        }
-        c.clearCart();
-        c.addItemInCart(first, 1);
-        try {
-            cartAsJSON = c.getCartAsJson();
-            String cartAsJsonString = cartAsJSON.toString(0);
-            assertEquals(correctJsonIntermediate, cartAsJsonString);
-        } catch (JSONException e) {
-            fail();
-        }
     }
 
 
@@ -142,11 +107,11 @@ public class CartUnitTest {
     public void testUpdateItemInCart(){
         Cart c = Cart.getInstance();
         c.clearCart();
-        c.addItemInCart(first,1);
-        c.updateItemInCart(first, 25);
+        c.addItemInCart(first,1,true);
+        c.updateItemInCart(first, 25,true);
         int newQuantity = c.getItemsInCart().get(0).second;
         assertEquals(26,newQuantity);
-        c.updateItemInCart(first, 0);
+        c.updateItemInCart(first, 0,true);
         newQuantity = c.getItemsInCart().get(0).second;
         assertEquals(26,newQuantity);
     }
