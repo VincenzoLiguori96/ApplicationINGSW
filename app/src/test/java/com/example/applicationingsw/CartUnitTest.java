@@ -62,14 +62,14 @@ public class CartUnitTest {
         Cart c = Cart.getInstance();
         c.clearCart();
         c.addItemInCart(first,1,true);
-        c.addItemInCart(second, 2,true);
+        c.addItemInCart(second, 1,true);
         c.addItemInCart(third, 1,true);
-        c.addItemInCart(fourth, 3,true);
-        c.addItemInCart(fifth, 2,true);
-        c.addItemInCart(sixth, 15,true);
-        c.addItemInCart(seventh, 9,true);
-        c.addItemInCart(eighth, 2,true);
-        c.addItemInCart(ninth, 102,true);
+        c.addItemInCart(fourth, 1,true);
+        c.addItemInCart(fifth, 1,true);
+        c.addItemInCart(sixth, 1,true);
+        c.addItemInCart(seventh, 1,true);
+        c.addItemInCart(eighth, 1,true);
+        c.addItemInCart(ninth, 1,true);
         assertEquals(9, c.getItemsInCart().size());
     }
 
