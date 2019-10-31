@@ -95,7 +95,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 goToCart();
             }
         });
-
         //Bind RecyclerView from layout to recyclerViewProducts object
         recyclerViewProducts = findViewById(R.id.recyclerViewProducts);
 
@@ -122,7 +121,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             }
         });
         itemsAdapter = new ItemsAdapter(this,this,itemsList);
-        loadItemsData();
+        getItemsFromAPI();
         //add on on Scroll listener
         //add space between cards
         //Create new itemsAdapter
@@ -157,11 +156,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 getItemsFiltered(query_string);
             }
         }
-    }
-
-
-    private void loadItemsData() {
-        getItemsFromAPI();
     }
 
 
@@ -291,41 +285,41 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     }
 
     public void manageNetworkingError(VolleyError error){
-        if(refreshLayout.isRefreshing()){
-            refreshLayout.setRefreshing(false);
-            itemsAdapter.notifyDataSetChanged();
-        }
-        itemsAdapter.showLoading();
-        String message = null;
-        if (error instanceof NetworkError) {
-            message = "Cannot connect to Internet...Please check your connection!";
-        } else if (error instanceof ServerError) {
-            message = "The server could not be found. Please try again after some time!";
-        } else if (error instanceof AuthFailureError) {
-            message = "Cannot connect to Internet...Please check your connection!";
-        } else if (error instanceof ParseError) {
-            message = "Parsing error! Please try again after some time!";
-        } else if (error instanceof NoConnectionError) {
-            message = "Cannot connect to Internet...Please check your connection!";
-        } else if (error instanceof TimeoutError) {
-            message = "Connection TimeOut! Please check your internet connection.";
-        }
-        else{
-            message = "Unknown connection error. Please retry.";
-        }
-        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
-        builder1.setMessage(message);
-        builder1.setCancelable(false);
-        builder1.setTitle("An error occured");
-        builder1.setPositiveButton(
-                "Ok",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alert11 = builder1.create();
-        alert11.show();
+            if(refreshLayout.isRefreshing()){
+                refreshLayout.setRefreshing(false);
+                itemsAdapter.notifyDataSetChanged();
+            }
+            itemsAdapter.showLoading();
+            String message = null;
+            if (error instanceof NetworkError) {
+                message = "Cannot connect to Internet...Please check your connection!";
+            } else if (error instanceof ServerError) {
+                message = "The server could not be found. Please try again after some time!";
+            } else if (error instanceof AuthFailureError) {
+                message = "Cannot connect to Internet...Please check your connection!";
+            } else if (error instanceof ParseError) {
+                message = "Parsing error! Please try again after some time!";
+            } else if (error instanceof NoConnectionError) {
+                message = "Cannot connect to Internet...Please check your connection!";
+            } else if (error instanceof TimeoutError) {
+                message = "Connection TimeOut! Please refresh.";
+            }
+            else{
+                message = "Unknown connection error. Please retry.";
+            }
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+            builder1.setMessage(message);
+            builder1.setCancelable(false);
+            builder1.setTitle("An error occured");
+            builder1.setPositiveButton(
+                    "Ok",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
     }
 
     @Override

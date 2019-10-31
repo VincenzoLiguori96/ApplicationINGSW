@@ -97,6 +97,10 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
                     ItemHolder.textViewAvailability.setBackgroundColor(Color.parseColor("#ff0000"));
                     ItemHolder.textViewAvailability.setText("Unavailable");
                 }
+                if(currentItem.isLoading()){
+                    ItemHolder.textViewAvailability.setBackgroundColor(Color.parseColor("#ffffff"));
+                    ItemHolder.textViewAvailability.setText("Loading...");
+                }
                 ItemHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -205,12 +209,15 @@ public class ItemsAdapter extends RecyclerView.Adapter implements Filterable {
     }
 
     //method to hide loading 
-    public void hideLoading() {
-        if (loadingItemPos <= mItems.size()) {
-            mItems.remove(loadingItemPos - 1);
-            notifyItemRemoved(loadingItemPos);
-            loading = false;
+    public void hideLoading(){
+        for(int i = 0; i<mItems.size(); i++){
+            if(mItems.get(i).isLoading()){
+                mItems.remove(i);
+                loading = false;
+                notifyItemRemoved(i);
+            }
         }
+        notifyDataSetChanged();
     }
 
 

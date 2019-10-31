@@ -44,6 +44,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
     private LinearLayout addToCart ;
     private Item currentItem;
     private Vibrator vibe ;
+    private Cart cart = Cart.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -125,8 +126,6 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
         quantity++;
         quantityTextView.setText(quantity.toString());
         vibe.vibrate(75);
-
-
     }
 
 
@@ -174,7 +173,7 @@ public class ItemDetailActivity extends Activity implements NavigationView.OnNav
             vibe.vibrate(100);
             Toast.makeText(getApplicationContext(),itemToAdd.getName() + " added", Toast.LENGTH_SHORT).show();
             int quantity = Integer.valueOf(quantityTextView.getText().toString());
-            Cart.getInstance().addItemInCart(itemToAdd,quantity,false);
+            cart.addItemInCart(itemToAdd,quantity,false);
         }
         else {
             new AlertDialog.Builder(this)
